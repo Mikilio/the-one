@@ -1,0 +1,13 @@
+Scenario.nrofHostGroups = 2
+
+Group.zombieApocalypseControlSystemNr = 1
+
+Group1.groupID = h
+Group1.nrofHosts = 2
+Group1.movementModel = ZombieApocalypseMovement
+Group1.isZombie = false
+
+Group2.groupID = z
+Group2.nrofHosts = 1
+Group2.movementModel = ZombieApocalypseMovement
+Group2.isZombie = true
