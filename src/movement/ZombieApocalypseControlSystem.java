@@ -1,0 +1,122 @@
+package movement;
+
+import core.Coord;
+import core.DTNSim;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * Control system for a zombie apocalypse.
+ *
+ * @author Bisma Baubeau
+ */
+public class ZombieApocalypseControlSystem {
+
+    public static final String ZOMBIE_APOCALYPSE_CONTROL_SYSTEM_NR = "zombieApocalypseControlSystemNr";
+
+	private static HashMap<Integer, ZombieApocalypseControlSystem> systems;
+
+	private HashMap<Integer, ZombieApocalypseMovement> humans;
+	private HashMap<Integer, ZombieApocalypseMovement> zombies;
+    private List<Coord> exits;
+
+	static {
+		DTNSim.registerForReset(BusControlSystem.class.getCanonicalName());
+		reset();
+	}
+
+	/**
+	 * Creates a new instance of ontrolSystem without any entities.
+	 * @param systemID The unique ID of this system.
+	 */
+	private ZombieApocalypseControlSystem(int systemID) {
+		exits = new LinkedList<>();
+		humans = new HashMap<>();
+		zombies = new HashMap<>();
+
+		exits.add(new Coord(0, 0)); // TODO: delete (only for testing)
+	}
+
+	public static void reset() {
+		systems = new HashMap<>();
+	}
+
+		/**
+	 * Returns a reference to a ZombieApocalypseControlSystem with ID provided as parameter.
+	 * If a system does not already exist with the requested ID, a new one is
+	 * created.
+	 * @param systemID unique ID of the system
+	 * @return The bus control system with the provided ID
+	 */
+	public static ZombieApocalypseControlSystem getZombieApocalypseControlSystem(int systemID) {
+		Integer id = systemID;
+
+		if (systems.containsKey(id)) {
+			return systems.get(id);
+		} else {
+			ZombieApocalypseControlSystem zacs = new ZombieApocalypseControlSystem(systemID);
+			systems.put(id, zacs);
+			return zacs;
+		}
+	}
+
+	public void registerHuman(ZombieApocalypseMovement human) {
+		humans.put(human.getID(), human);
+	}
+
+	public void unregisterHuman(int humanID) {
+		humans.remove(humanID);
+	}
+
+
+	public void registerZombie(ZombieApocalypseMovement zombie) {
+		zombies.put(zombie.getID(), zombie);
+	}
+
+	public void unregisterZombie(int zombieID) {
+		zombies.remove(zombieID);
+	}
+
+	public void turnToZombie(int humanID) {
+		ZombieApocalypseMovement human = humans.get(humanID);
+		if (human != null) {
+			zombies.put(human.getID(), human);
+			humans.remove(humanID);
+		}
+	}
+
+    /**
+	 * @return A list of all exits belonging to this system
+	 */
+	public List<Coord> getExits() {
+		return exits;
+	}
+
+	public void setExits(List<Coord> exits) {
+		this.exits = exits;
+	}	
+
+	public List<Coord> getHumanCoords() {
+		List<Coord> coords = new LinkedList<>();
+		for (ZombieApocalypseMovement human : humans.values()) {
+			if (human.getLastLocation() == null) {
+				continue;
+			}
+			coords.add(human.getLastLocation());
+		}
+		return coords;
+	}
+
+	public List<Coord> getZombieCoords() {
+		List<Coord> coords = new LinkedList<>();
+		for (ZombieApocalypseMovement zombie : zombies.values()) {
+			if (zombie.getLastLocation() == null) {
+				continue;
+			}
+			coords.add(zombie.getLastLocation());
+		}
+		return coords;
+	}
+}
