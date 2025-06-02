@@ -12,15 +12,17 @@ import java.util.List;
  *
  * @author Bisma Baubeau
  */
-public class HumanMovement extends ExtendedMovementModel implements SwitchableMovement {
+public class HumanMovement extends MovementModel implements SwitchableMovement {
 	
 	public static final int STATIC = 0;
 	public static final int WALKING = 1;
 	public static final int FLEEING = 2;
 
+	public static final double DETECTION_RADIUS = 1000; // Radius to detect zombies and alerted humans
+
 	public static final double K_H = 1; // Repulsion constant of humans
 	public static final double K_Z = 1; // Repulsion constant of zombies
-	public static final int A_H = 3; // Repulsion exponent of humans
+	public static final int A_H = 1; // Repulsion exponent of humans
 	public static final int A_Z = 2; // Repulsion exponent of zombies
 
 	private int id;
@@ -39,10 +41,9 @@ public class HumanMovement extends ExtendedMovementModel implements SwitchableMo
 
 	public HumanMovement(Settings settings) {
 		super(settings);
-		setCurrentMovementModel(this);
 
 		int acs = settings.getInt(ApocalypseControlSystem.APOCALYPSE_CONTROL_SYSTEM_NR);
-		controlSystem = ApocalypseControlSystem.getApocalypseControlSystem(acs);
+		controlSystem = ApocalypseControlSystem.getApocalypseControlSystem(settings,acs);
 		controlSystem.registerHuman(this);
 		id = nextID++;
 		state = FLEEING; // TODO: change, for testing purposes
@@ -54,7 +55,6 @@ public class HumanMovement extends ExtendedMovementModel implements SwitchableMo
 
 	protected HumanMovement(HumanMovement hmv) {
 		super(hmv);
-		setCurrentMovementModel(this);
 
 		state = hmv.state;
 		controlSystem = hmv.controlSystem;
@@ -89,6 +89,10 @@ public class HumanMovement extends ExtendedMovementModel implements SwitchableMo
 		p.addWaypoint(lastWaypoint.clone());
 
 		Coord c;
+		
+		if (state == STATIC || state == WALKING) {
+			probeForZombies();
+		}
 		
 		if (state == STATIC) {
 			return null;
@@ -135,12 +139,6 @@ public class HumanMovement extends ExtendedMovementModel implements SwitchableMo
 	}
 
 	@Override
-	public boolean newOrders() {
-		// TODO: implement fleeing or turning to zombie
-		return true;
-	}
-
-	@Override
 	public HumanMovement replicate() {
 		return new HumanMovement(this);
 	}
@@ -165,9 +163,27 @@ public class HumanMovement extends ExtendedMovementModel implements SwitchableMo
 		return true;
 	}
 
+	public boolean isCloseToExit() {
+		if (exits.isEmpty()) {
+			return false; // No exits available
+		}
+		Coord closestExit = getClosestCoordinate(exits, lastWaypoint);
+		return closestExit.distance(lastWaypoint) < distance;
+	}
+
 	protected Coord randomCoord() {
 		return new Coord(rng.nextDouble() * getMaxX(),
 				rng.nextDouble() * getMaxY());
+	}
+
+	private boolean probeForZombies() {
+		zombies = controlSystem.getZombieCoords();
+		Coord closestZombie = getClosestCoordinate(zombies, lastWaypoint);
+		if (closestZombie != null && closestZombie.distance(lastWaypoint) < DETECTION_RADIUS) {
+			state = FLEEING; // Alerted by a zombie, switch to fleeing state
+			return true;
+		}
+		return false;
 	}
 
 	private Coord calculateFleeingPath(Coord currentLocation, List<Coord> exits, List<Coord> humans, List<Coord> zombies) {
@@ -178,7 +194,7 @@ public class HumanMovement extends ExtendedMovementModel implements SwitchableMo
 		if (!exits.isEmpty()) {
 			c = getClosestCoordinate(exits, currentLocation);
 		} else {
-			c = new Coord(0,0);
+			c = currentLocation.clone();
 		}
 
 		// Normalized vector towards the closest attraction point
@@ -192,12 +208,12 @@ public class HumanMovement extends ExtendedMovementModel implements SwitchableMo
 
 		// Adding repulsion
 		for (Coord h : humans) {
-			Coord repulsion = repulsionVector(currentLocation, h, K_H, A_H);
+			Coord repulsion = exponentialRepulsionVector(currentLocation, h, K_H, A_H);
 			dx += repulsion.getX();
 			dy += repulsion.getY();
 		}
 		for (Coord z : zombies) {
-			Coord repulsion = repulsionVector(currentLocation, z, K_Z, A_Z);
+			Coord repulsion = polynomialRepulsionVector(currentLocation, z, K_Z, A_Z);
 			dx += repulsion.getX();
 			dy += repulsion.getY();
 		}
@@ -240,8 +256,8 @@ public class HumanMovement extends ExtendedMovementModel implements SwitchableMo
 	}
 
 	/**
-	 * Calculates the repulsion vector between two coordinates.
-	 * v = k * (c - other) / dist^a
+	 * Calculates a polynomial decreasing repulsion vector between two coordinates.
+	 * v = k * 1 / dist^a * (c - other) / dist
 	 * 
 	 * @param c The coordinate from which the repulsion is calculated.
 	 * @param other The coordinate to which the repulsion is directed.
@@ -249,7 +265,7 @@ public class HumanMovement extends ExtendedMovementModel implements SwitchableMo
 	 * @param a The exponent for the distance in the repulsion formula.
 	 * @return A Coord representing the repulsion vector.
 	 */
-	private static Coord repulsionVector(Coord c, Coord other, double k, int a) {
+	private static Coord polynomialRepulsionVector(Coord c, Coord other, double k, int a) {
 		double dx = c.getX() - other.getX();
 		double dy = c.getY() - other.getY();
 		double dist = c.distance(other);
@@ -259,6 +275,31 @@ public class HumanMovement extends ExtendedMovementModel implements SwitchableMo
 		return new Coord(
 			k * dx / Math.pow(dist, a+1), 
 			k * dy / Math.pow(dist, a+1)
+		);
+	}
+
+	/**
+	 * Calculates an exponention repulsion vector between two coordinates.
+	 * The vector is scaled by a constant and an exponent.
+	 * 
+	 * v = k * exp(-a * dist) * (c - other) / dist
+	 * 
+	 * @param c The coordinate from which the repulsion is calculated.
+	 * @param other The coordinate to which the repulsion is directed.
+	 * @param k The repulsion constant.
+	 * @param a The exponent for the distance in the repulsion formula.
+	 * @return A Coord representing the repulsion vector.
+	 */
+	private static Coord exponentialRepulsionVector(Coord c, Coord other, double k, int a) {
+		double dx = c.getX() - other.getX();
+		double dy = c.getY() - other.getY();
+		double dist = c.distance(other);
+		if (dist == 0) {
+			return new Coord(0,0); // Avoid division by zero
+		}
+		return new Coord(
+			k * Math.exp(-a * dist) * dx / dist, 
+			k * Math.exp(-a * dist) * dy / dist
 		);
 	}
 }

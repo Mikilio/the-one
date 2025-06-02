@@ -12,13 +12,13 @@ import java.util.List;
  *
  * @author Bisma Baubeau
  */
-public class ZombieMovement extends ExtendedMovementModel implements SwitchableMovement {
+public class ZombieMovement extends MovementModel implements SwitchableMovement {
 
 	public static final int STATIC = 0;
 	public static final int ROAMING = 1;
 	public static final int CHASING = 2;
 
-	public static final double DETECTION_RADIUS = 100000; // Radius for detecting other entities
+	public static final double DETECTION_RADIUS = 1000; // Radius for detecting other entities
 
 	private int id;
 	private static int nextID = 0;
@@ -34,11 +34,10 @@ public class ZombieMovement extends ExtendedMovementModel implements SwitchableM
 
 	public ZombieMovement(Settings settings) {
 		super(settings);
-		setCurrentMovementModel(this);
 
 		state = ROAMING;
 		int acs = settings.getInt(ApocalypseControlSystem.APOCALYPSE_CONTROL_SYSTEM_NR);
-		controlSystem = ApocalypseControlSystem.getApocalypseControlSystem(acs);
+		controlSystem = ApocalypseControlSystem.getApocalypseControlSystem(settings,acs);
 		id = nextID++;
 		controlSystem.registerZombie(this);
 		nextDestination = randomCoord();
@@ -48,12 +47,12 @@ public class ZombieMovement extends ExtendedMovementModel implements SwitchableM
 
 	protected ZombieMovement(ZombieMovement zmv) {
 		super(zmv);
-		setCurrentMovementModel(this);
 		
 		state = zmv.state;
 		controlSystem = zmv.controlSystem;
 		id = nextID++;
 		controlSystem.registerZombie(this);
+		lastWaypoint = zmv.lastWaypoint != null ? zmv.lastWaypoint.clone() : null;
 		nextDestination = zmv.nextDestination != null ? zmv.nextDestination.clone() : null;
 		
 		humans = new LinkedList<>(zmv.humans);
@@ -61,7 +60,6 @@ public class ZombieMovement extends ExtendedMovementModel implements SwitchableM
 
 	public ZombieMovement(HumanMovement hmv) {
 		super(hmv);
-		setCurrentMovementModel(this);
 
 		state = ROAMING;
 		controlSystem = hmv.getControlSystem();
@@ -96,6 +94,10 @@ public class ZombieMovement extends ExtendedMovementModel implements SwitchableM
 		Coord c;
 
 		probeForHumans();
+		// If in ROAMING state, set a new random destination if needed
+		if (state == ROAMING && (nextDestination == null || nextDestination.distance(lastWaypoint) < distance)) {
+			nextDestination = randomCoord();
+		}
 		
 		if (state == STATIC) {
 			return null; // No movement in these states
@@ -130,38 +132,6 @@ public class ZombieMovement extends ExtendedMovementModel implements SwitchableM
 		return p;
 	}
 
-
-	/**
-	 * Switches state between getPath() calls and calculates the next destination.
-	 * @return Always 0
-	 */
-	@Override
-	public boolean newOrders() {
-		probeForHumans();
-
-		// If in ROAMING state, set a new random destination if needed
-		if (state == ROAMING && (nextDestination == null || nextDestination.distance(lastWaypoint) < distance)) {
-			nextDestination = randomCoord();
-		}
-
-		return true; // Always return true to indicate new orders are set
-	}
-
-	private boolean probeForHumans() {
-		// Check if there are humans within the detection radius
-		humans = controlSystem.getHumanCoords();
-		Coord closestHuman = getClosestCoordinate(humans, lastWaypoint);
-
-		if (closestHuman != null && closestHuman.distance(lastWaypoint) <= DETECTION_RADIUS) {
-			nextDestination = closestHuman.clone();
-			state = CHASING; // Change state to chasing
-			return true;
-		} else {
-			state = ROAMING; // No humans detected, continue roaming
-			return false;
-		}
-	}
-
 	@Override
 	public ZombieMovement replicate() {
 		return new ZombieMovement(this);
@@ -179,16 +149,27 @@ public class ZombieMovement extends ExtendedMovementModel implements SwitchableM
 		this.lastWaypoint = lastWaypoint;
 	}
 
-	public int getState() {
-		return state;
-	}
-
-	public void setState(int state) {
-		this.state = state;
+	public ApocalypseControlSystem getControlSystem() {
+		return controlSystem;
 	}
 
 	public boolean isReady() {
 		return true;
+	}
+
+	private boolean probeForHumans() {
+		// Check if there are humans within the detection radius
+		humans = controlSystem.getHumanCoords();
+		Coord closestHuman = getClosestCoordinate(humans, lastWaypoint);
+
+		if (closestHuman != null && closestHuman.distance(lastWaypoint) <= DETECTION_RADIUS) {
+			nextDestination = closestHuman.clone();
+			state = CHASING; // Change state to chasing
+			return true;
+		} else {
+			state = ROAMING; // No humans detected, continue roaming
+			return false;
+		}
 	}
 
 	protected Coord randomCoord() {
@@ -214,6 +195,6 @@ public class ZombieMovement extends ExtendedMovementModel implements SwitchableM
 				closestCoord = temp;
 			}
 		}
-		return closestCoord.clone();
+		return closestCoord != null ? closestCoord.clone() : null;
 	}
 }

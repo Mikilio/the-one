@@ -2,6 +2,7 @@ package movement;
 
 import core.Coord;
 import core.DTNSim;
+import core.Settings;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -15,6 +16,7 @@ import java.util.List;
 public class ApocalypseControlSystem {
 
     public static final String APOCALYPSE_CONTROL_SYSTEM_NR = "apocalypseControlSystemNr";
+	public static final String EXITS_LOCATIONS_SETTING = "exitsLocations";
 
 	private static HashMap<Integer, ApocalypseControlSystem> systems;
 
@@ -31,14 +33,19 @@ public class ApocalypseControlSystem {
 	 * Creates a new instance of ontrolSystem without any entities.
 	 * @param systemID The unique ID of this system.
 	 */
-	private ApocalypseControlSystem(int systemID) {
+	private ApocalypseControlSystem(Settings s, int systemID) {
 		exits = new LinkedList<>();
 		humans = new HashMap<>();
 		zombies = new HashMap<>();
 
-		// TODO: delete (only for testing)
-		exits.add(new Coord(0, 0));
-		exits.add(new Coord(100, 100));
+		if (s != null) {
+			int[] exitCoords = s.getCsvInts(EXITS_LOCATIONS_SETTING);
+			for (int i = 0; i < exitCoords.length; i += 2) {
+				if (i + 1 < exitCoords.length) {
+					exits.add(new Coord(exitCoords[i], exitCoords[i + 1]));
+				}
+			}
+		}
 	}
 
 	public static void reset() {
@@ -52,13 +59,13 @@ public class ApocalypseControlSystem {
 	 * @param systemID unique ID of the system
 	 * @return The bus control system with the provided ID
 	 */
-	public static ApocalypseControlSystem getApocalypseControlSystem(int systemID) {
+	public static ApocalypseControlSystem getApocalypseControlSystem(Settings s, int systemID) {
 		Integer id = systemID;
 
 		if (systems.containsKey(id)) {
 			return systems.get(id);
 		} else {
-			ApocalypseControlSystem acs = new ApocalypseControlSystem(systemID);
+			ApocalypseControlSystem acs = new ApocalypseControlSystem(s, systemID);
 			systems.put(id, acs);
 			return acs;
 		}
