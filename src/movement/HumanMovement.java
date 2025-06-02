@@ -12,20 +12,11 @@ import java.util.List;
  *
  * @author Bisma Baubeau
  */
-public class ZombieApocalypseMovement extends MovementModel implements SwitchableMovement {
-
-	public static final String IS_ZOMBIE_SETTING = "isZombie";
-
-	public static final int HUMAN_STATIC = 0;
-	public static final int HUMAN_WALKING = 1;
-	public static final int HUMAN_FLEEING = 2;
-	public static final int HUMAN_FIGHTING = 3;
-	public static final int HUMAN_TURNING = 4;
-
-	public static final int ZOMBIE_ROAMING = 5;
-	public static final int ZOMBIE_CHASING = 6;
-	public static final int ZOMBIE_FIGHTING = 7;
-	public static final int ZOMBIE_STUNNED = 8;
+public class HumanMovement extends ExtendedMovementModel implements SwitchableMovement {
+	
+	public static final int STATIC = 0;
+	public static final int WALKING = 1;
+	public static final int FLEEING = 2;
 
 	public static final double K_H = 1; // Repulsion constant of humans
 	public static final double K_Z = 1; // Repulsion constant of zombies
@@ -34,53 +25,44 @@ public class ZombieApocalypseMovement extends MovementModel implements Switchabl
 
 	private int id;
 	private static int nextID = 0;
-	private ZombieApocalypseControlSystem controlSystem;
+	private ApocalypseControlSystem controlSystem;
 
 	private int state;
 
 	private Coord lastWaypoint;
-	private double distance; // distance between waypoints
+	private Coord walkingDestination; // for WALKING state
+	private final double distance = 10; // distance to move before recalculating path (TODO: change)
+
 	private List<Coord> exits;
 	private List<Coord> humans;
 	private List<Coord> zombies;
 
-	public ZombieApocalypseMovement(Settings settings) {
+	public HumanMovement(Settings settings) {
 		super(settings);
-		boolean isZombie = settings.getBoolean(ZombieApocalypseMovement.IS_ZOMBIE_SETTING);
+		setCurrentMovementModel(this);
 
-		int zacs = settings.getInt(ZombieApocalypseControlSystem.ZOMBIE_APOCALYPSE_CONTROL_SYSTEM_NR);
-		controlSystem = ZombieApocalypseControlSystem.getZombieApocalypseControlSystem(zacs);
+		int acs = settings.getInt(ApocalypseControlSystem.APOCALYPSE_CONTROL_SYSTEM_NR);
+		controlSystem = ApocalypseControlSystem.getApocalypseControlSystem(acs);
 		id = nextID++;
-		this.distance = 10; // TODO: change
-		if (isZombie) {
-			this.state = ZOMBIE_ROAMING;
-			controlSystem.registerZombie(this);
-		} else {
-			this.state = HUMAN_FLEEING; // TODO: change
-			controlSystem.registerHuman(this);
-		}
+		state = FLEEING; // TODO: change, for testing purposes
+
 		this.exits = new LinkedList<>();
 		this.humans = new LinkedList<>();
 		this.zombies = new LinkedList<>();
 	}
 
-	protected ZombieApocalypseMovement(ZombieApocalypseMovement zamv) {
-		super(zamv);
-		this.distance = zamv.distance;
-		this.state = zamv.state;
-		this.controlSystem = zamv.controlSystem;
-		id = nextID++;
-		this.lastWaypoint = zamv.lastWaypoint;
-		
-		if (isZombie()) {
-			controlSystem.registerZombie(this);
-		} else {
-			controlSystem.registerHuman(this);
-		}
+	protected HumanMovement(HumanMovement hmv) {
+		super(hmv);
+		setCurrentMovementModel(this);
 
-		this.exits = new LinkedList<>(zamv.exits);
-		this.humans = new LinkedList<>(zamv.humans);
-		this.zombies = new LinkedList<>(zamv.zombies);
+		state = hmv.state;
+		controlSystem = hmv.controlSystem;
+		id = nextID++;
+		walkingDestination = hmv.walkingDestination != null ? hmv.walkingDestination.clone() : null;
+		
+		exits = new LinkedList<>(hmv.exits);
+		humans = new LinkedList<>(hmv.humans);
+		zombies = new LinkedList<>(hmv.zombies);
 	}
 
 	/**
@@ -106,18 +88,29 @@ public class ZombieApocalypseMovement extends MovementModel implements Switchabl
 
 		Coord c;
 		
-		if (state == HUMAN_STATIC || state == HUMAN_FIGHTING || state == HUMAN_TURNING || state == ZOMBIE_FIGHTING || state == ZOMBIE_STUNNED) {
-			return null; // No movement in these states
-		} else if (state == HUMAN_WALKING || state == ZOMBIE_ROAMING) {
-			c = randomCoord();
+		if (state == STATIC) {
+			return null;
+		} else if (state == WALKING) {
+			if (walkingDestination == null || walkingDestination.distance(lastWaypoint) < distance) {
+				// If no next waypoint is set, generate a random one
+				walkingDestination = randomCoord();
+			}
+			double dx = walkingDestination.getX() - lastWaypoint.getX();
+			double dy = walkingDestination.getY() - lastWaypoint.getY();
+			double dist = lastWaypoint.distance(walkingDestination);
+			c = new Coord(
+				lastWaypoint.getX() + (dx / dist) * distance,
+				lastWaypoint.getY() + (dy / dist) * distance
+			);
 		}
-		else if (state == HUMAN_FLEEING) {
+		else if (state == FLEEING) {
 			exits = controlSystem.getExits();
 			humans = controlSystem.getHumanCoords();
 			zombies = controlSystem.getZombieCoords();
 			c = calculateFleeingPath(lastWaypoint, exits, humans, zombies);
 		} else {
-			c = lastWaypoint.clone();
+			// Default case, generate a random coordinate
+			c = randomCoord();
 		}
 
 		// Ensure the new coordinates are within bounds
@@ -140,12 +133,22 @@ public class ZombieApocalypseMovement extends MovementModel implements Switchabl
 	}
 
 	@Override
-	public ZombieApocalypseMovement replicate() {
-		return new ZombieApocalypseMovement(this);
+	public boolean newOrders() {
+		// TODO: implement fleeing or turning to zombie
+		return true;
+	}
+
+	@Override
+	public HumanMovement replicate() {
+		return new HumanMovement(this);
 	}
 
 	public int getID() {
 		return id;
+	}
+
+	public ApocalypseControlSystem getControlSystem() {
+		return controlSystem;
 	}
 
 	public Coord getLastLocation() {
@@ -156,31 +159,8 @@ public class ZombieApocalypseMovement extends MovementModel implements Switchabl
 		this.lastWaypoint = lastWaypoint;
 	}
 
-	public int getState() {
-		return state;
-	}
-
-	public void setState(int state) {
-		this.state = state;
-	}
-
 	public boolean isReady() {
 		return true;
-	}
-
-	public boolean isZombie() {
-		return (state == ZOMBIE_ROAMING || 
-				state == ZOMBIE_CHASING || 
-				state == ZOMBIE_FIGHTING || 
-				state == ZOMBIE_STUNNED);
-	}
-
-	public int turnToZombie() {
-		if (!isZombie()) {
-			controlSystem.turnToZombie(id);
-			state = ZOMBIE_ROAMING; // Default state for zombies
-		}
-		return id;
 	}
 
 	protected Coord randomCoord() {

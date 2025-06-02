@@ -77,7 +77,11 @@ public abstract class ExtendedMovementModel extends MovementModel {
 
 	@Override
 	protected double generateWaitTime() {
-		return ((MovementModel)currentMovementModel).generateWaitTime();
+		if (currentMovementModel == this) {
+			return super.generateWaitTime();
+		} else {
+			return ((MovementModel)currentMovementModel).generateWaitTime();
+		}
 	}
 
 	/**

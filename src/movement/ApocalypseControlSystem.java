@@ -12,14 +12,14 @@ import java.util.List;
  *
  * @author Bisma Baubeau
  */
-public class ZombieApocalypseControlSystem {
+public class ApocalypseControlSystem {
 
-    public static final String ZOMBIE_APOCALYPSE_CONTROL_SYSTEM_NR = "zombieApocalypseControlSystemNr";
+    public static final String APOCALYPSE_CONTROL_SYSTEM_NR = "apocalypseControlSystemNr";
 
-	private static HashMap<Integer, ZombieApocalypseControlSystem> systems;
+	private static HashMap<Integer, ApocalypseControlSystem> systems;
 
-	private HashMap<Integer, ZombieApocalypseMovement> humans;
-	private HashMap<Integer, ZombieApocalypseMovement> zombies;
+	private HashMap<Integer, HumanMovement> humans;
+	private HashMap<Integer, ZombieMovement> zombies;
     private List<Coord> exits;
 
 	static {
@@ -31,7 +31,7 @@ public class ZombieApocalypseControlSystem {
 	 * Creates a new instance of ontrolSystem without any entities.
 	 * @param systemID The unique ID of this system.
 	 */
-	private ZombieApocalypseControlSystem(int systemID) {
+	private ApocalypseControlSystem(int systemID) {
 		exits = new LinkedList<>();
 		humans = new HashMap<>();
 		zombies = new HashMap<>();
@@ -50,19 +50,19 @@ public class ZombieApocalypseControlSystem {
 	 * @param systemID unique ID of the system
 	 * @return The bus control system with the provided ID
 	 */
-	public static ZombieApocalypseControlSystem getZombieApocalypseControlSystem(int systemID) {
+	public static ApocalypseControlSystem getApocalypseControlSystem(int systemID) {
 		Integer id = systemID;
 
 		if (systems.containsKey(id)) {
 			return systems.get(id);
 		} else {
-			ZombieApocalypseControlSystem zacs = new ZombieApocalypseControlSystem(systemID);
-			systems.put(id, zacs);
-			return zacs;
+			ApocalypseControlSystem acs = new ApocalypseControlSystem(systemID);
+			systems.put(id, acs);
+			return acs;
 		}
 	}
 
-	public void registerHuman(ZombieApocalypseMovement human) {
+	public void registerHuman(HumanMovement human) {
 		humans.put(human.getID(), human);
 	}
 
@@ -70,21 +70,12 @@ public class ZombieApocalypseControlSystem {
 		humans.remove(humanID);
 	}
 
-
-	public void registerZombie(ZombieApocalypseMovement zombie) {
+	public void registerZombie(ZombieMovement zombie) {
 		zombies.put(zombie.getID(), zombie);
 	}
 
 	public void unregisterZombie(int zombieID) {
 		zombies.remove(zombieID);
-	}
-
-	public void turnToZombie(int humanID) {
-		ZombieApocalypseMovement human = humans.get(humanID);
-		if (human != null) {
-			zombies.put(human.getID(), human);
-			humans.remove(humanID);
-		}
 	}
 
     /**
@@ -100,7 +91,7 @@ public class ZombieApocalypseControlSystem {
 
 	public List<Coord> getHumanCoords() {
 		List<Coord> coords = new LinkedList<>();
-		for (ZombieApocalypseMovement human : humans.values()) {
+		for (HumanMovement human : humans.values()) {
 			if (human.getLastLocation() == null) {
 				continue;
 			}
@@ -111,7 +102,7 @@ public class ZombieApocalypseControlSystem {
 
 	public List<Coord> getZombieCoords() {
 		List<Coord> coords = new LinkedList<>();
-		for (ZombieApocalypseMovement zombie : zombies.values()) {
+		for (ZombieMovement zombie : zombies.values()) {
 			if (zombie.getLastLocation() == null) {
 				continue;
 			}
