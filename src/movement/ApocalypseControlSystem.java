@@ -36,7 +36,9 @@ public class ApocalypseControlSystem {
 		humans = new HashMap<>();
 		zombies = new HashMap<>();
 
-		exits.add(new Coord(0, 0)); // TODO: delete (only for testing)
+		// TODO: delete (only for testing)
+		exits.add(new Coord(0, 0));
+		exits.add(new Coord(100, 100));
 	}
 
 	public static void reset() {

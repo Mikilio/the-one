@@ -43,6 +43,7 @@ public class HumanMovement extends ExtendedMovementModel implements SwitchableMo
 
 		int acs = settings.getInt(ApocalypseControlSystem.APOCALYPSE_CONTROL_SYSTEM_NR);
 		controlSystem = ApocalypseControlSystem.getApocalypseControlSystem(acs);
+		controlSystem.registerHuman(this);
 		id = nextID++;
 		state = FLEEING; // TODO: change, for testing purposes
 
@@ -57,6 +58,7 @@ public class HumanMovement extends ExtendedMovementModel implements SwitchableMo
 
 		state = hmv.state;
 		controlSystem = hmv.controlSystem;
+		controlSystem.registerHuman(this);
 		id = nextID++;
 		walkingDestination = hmv.walkingDestination != null ? hmv.walkingDestination.clone() : null;
 		

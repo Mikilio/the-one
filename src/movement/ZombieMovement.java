@@ -94,6 +94,8 @@ public class ZombieMovement extends ExtendedMovementModel implements SwitchableM
 		p.addWaypoint(lastWaypoint.clone());
 
 		Coord c;
+
+		probeForHumans();
 		
 		if (state == STATIC) {
 			return null; // No movement in these states
@@ -135,16 +137,7 @@ public class ZombieMovement extends ExtendedMovementModel implements SwitchableM
 	 */
 	@Override
 	public boolean newOrders() {
-		// Check if there are humans within the detection radius
-		humans = controlSystem.getHumanCoords();
-		Coord closestHuman = getClosestCoordinate(humans, lastWaypoint);
-
-		if (closestHuman != null && closestHuman.distance(lastWaypoint) <= DETECTION_RADIUS) {
-			nextDestination = closestHuman.clone();
-			state = CHASING; // Change state to chasing
-		} else {
-			state = ROAMING; // No humans detected, continue roaming
-		}
+		probeForHumans();
 
 		// If in ROAMING state, set a new random destination if needed
 		if (state == ROAMING && (nextDestination == null || nextDestination.distance(lastWaypoint) < distance)) {
@@ -152,6 +145,21 @@ public class ZombieMovement extends ExtendedMovementModel implements SwitchableM
 		}
 
 		return true; // Always return true to indicate new orders are set
+	}
+
+	private boolean probeForHumans() {
+		// Check if there are humans within the detection radius
+		humans = controlSystem.getHumanCoords();
+		Coord closestHuman = getClosestCoordinate(humans, lastWaypoint);
+
+		if (closestHuman != null && closestHuman.distance(lastWaypoint) <= DETECTION_RADIUS) {
+			nextDestination = closestHuman.clone();
+			state = CHASING; // Change state to chasing
+			return true;
+		} else {
+			state = ROAMING; // No humans detected, continue roaming
+			return false;
+		}
 	}
 
 	@Override
