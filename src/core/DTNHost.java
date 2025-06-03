@@ -149,6 +149,14 @@ public class DTNHost implements Comparable<DTNHost> {
 	}
 
 	/**
+	 * Returns the router of this host
+	 * @return the router of this host
+	 */
+	public MovementModel getMovement() {
+		return this.movement;
+	}
+
+	/**
 	 * Returns the network-layer address of this host.
 	 */
 	public int getAddress() {

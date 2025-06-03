@@ -4,21 +4,29 @@
  */
 package interfaces;
 
+import core.Connection;
 import core.NetworkInterface;
 import core.Settings;
 import core.SimClock;
-import core.CBRConnection;
-import core.Connection;
+import java.util.Collection;
+import movement.ApocalypseMovement;
 
 /**
- * A Network Interface that connects to LeverInterfaces one at a time.
- * A host with this interface should also be stationary.
+ * A Network Interface that connects to LeverInterfaces one at a time. A host with this interface
+ * should also be stationary.
  */
-public class ExitInterface extends SimpleBroadcastInterface {
+public class ExitInterface extends SimpleBroadcastInterface implements Activatable {
+
+  public boolean active;
+
+  private double lastConnectionTime = 0;
+
+  private final double EXIT_INTERVAL = 1.0;
 
   /** Reads the interface settings from the Settings file */
   public ExitInterface(Settings s) {
     super(s);
+    active = true; // TODO: this is actually a bad idea instead handle in register
   }
 
   /**
@@ -28,50 +36,66 @@ public class ExitInterface extends SimpleBroadcastInterface {
    */
   public ExitInterface(ExitInterface ni) {
     super(ni);
+    this.active = ni.active;
   }
-
-  private double lastConnectionTime;
-
-  private final double EXIT_INTERVAL = 2.0;
 
   public NetworkInterface replicate() {
     return new ExitInterface(this);
   }
 
   @Override
-  public void connect(NetworkInterface anotherInterface) {
-    
-    if (!(anotherInterface instanceof LeaverInterface)) return;
-      
+  public void update() {
+    if (optimizer == null) {
+      return; /* nothing to do */
+    }
+
     double simTime = SimClock.getTime();
 
-    if (simTime < lastConnectionTime + EXIT_INTERVAL) return;
+    optimizer.updateLocation(this);
+    if (this.connections.size() > 0) {
 
-    super.connect(anotherInterface);
-  }
-
-  @Override
-  public void update() {
-    for (int i=0; i<this.connections.size(); ) {
-      Connection con = this.connections.get(i);
+      Connection con = this.connections.get(0);
       NetworkInterface anotherInterface = con.getOtherInterface(this);
 
       // all connections should be up at this stage
-      assert con.isUp() : "Connection " + con + " was down!";
-      
-      // Let leavers leave (deactivate their interface)
-      if (anotherInterface instanceof LeaverInterface) {
-        LeaverInterface leaver = (LeaverInterface) anotherInterface;
+      assert this.connections.size() == 1 : "Too many connections on exit!";
+
+      if (getHost().getMovement() instanceof ApocalypseMovement) {
         disconnect(con, anotherInterface);
-        connections.remove(i);
-        leaver.deactivate();
+        connections.remove(0);
+
+        ConnectivityGrid grid = (ConnectivityGrid) optimizer;
+        grid.removeInterface(this);
+
+        ApocalypseMovement movement = (ApocalypseMovement) getHost().getMovement();
+        movement.removeFromSimulation();
+      }
+
+    } else {
+      if (simTime < lastConnectionTime + EXIT_INTERVAL) return;
+      if (getHost().getMovement() instanceof ApocalypseMovement) return;
+
+      // Then find new possible connections
+      Collection<NetworkInterface> interfaces = optimizer.getNearInterfaces(this);
+      if (interfaces.iterator().hasNext()) {
+        lastConnectionTime = simTime;
+        ExitInterface next = (ExitInterface) interfaces.iterator().next();
+        assert next.isActive() : "Inactive interface in grid";
+        connect(next);
       }
     }
   }
 
-  // Make this Interface Invisible to others
   @Override
   public boolean isActive() {
-    return false;
+    return active;
+  }
+
+  public void activate() {
+    active = true;
+  }
+
+  public void deactivate() {
+    active = false;
   }
 }

@@ -7,8 +7,11 @@ package input;
 import core.DTNHost;
 import core.NetworkInterface;
 import core.World;
-import interfaces.LeaverInterface;
 import java.util.Iterator;
+import movement.ApocalypseMovement;
+import movement.HumanMovement;
+import movement.NoMovement;
+import movement.ZombieMovement;
 
 /**
  * A connection up/down event.
@@ -38,10 +41,11 @@ public class ExitEvent extends ExternalEvent {
     while (hosts.hasNext()) {
       newActor = hosts.next();
       if (newActor.groupId != groupId) {continue;}
-      NetworkInterface netInterface = newActor.getInterface(0);
-      if (netInterface instanceof LeaverInterface) {
-        LeaverInterface leaver = (LeaverInterface) netInterface;
-        leaver.activate();
+      ApocalypseMovement movement = (ApocalypseMovement)newActor.getMovement();
+      if (movement.getCurrentMovementModel() instanceof NoMovement) {
+        NoMovement nom = (NoMovement) movement.getCurrentMovementModel();
+        movement.setCurrentMovementModel(zombie ? new ZombieMovement(nom) : new HumanMovement(nom));
+        return;
       }
     }
 	}
