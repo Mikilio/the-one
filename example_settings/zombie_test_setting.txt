@@ -1,8 +1,8 @@
 Scenario.name = classroom_zombie
 Scenario.simulateConnections = true
-Scenario.updateInterval = 0.1
-Scenario.endTime = 10000
-# ~2.7 hours
+Scenario.updateInterval = 0.01
+Scenario.endTime = 1000
+# ~16 min
 
 # Communication settings
 agentInterface.type = AgentInterface
@@ -31,7 +31,7 @@ Group1.waitTime = 0, 0
 Group1.nrofInterfaces = 2
 Group1.interface1 = agentInterface
 Group1.interface2 = exitInterface
-Group1.speed = 0.5, 1
+Group1.speed = 0.8, 1
 Group1.nrofHosts = 12
 
 
@@ -56,7 +56,7 @@ Group2.nrofHosts = 2
 ################################
 Group3.groupID = exit
 Group3.movementModel = StationaryMovement
-Group3.router = ExitRouter
+Group3.router = PassiveRouter
 Group3.nrofInterfaces = 1
 Group3.interface1 = exitInterface
 Group3.nodeLocation = 0, 0
@@ -69,7 +69,7 @@ Group3.nrofHosts = 1
 # Movement model settings
 ##############################
 MovementModel.rngSeed = 1
-MovementModel.worldSize = 600 , 500
+MovementModel.worldSize = 20 , 15
 # classroom size
 # short warmup
 MovementModel.warmup = 10

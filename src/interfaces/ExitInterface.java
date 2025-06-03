@@ -37,7 +37,7 @@ public class ExitInterface extends SimpleBroadcastInterface implements Activatab
 
   private double lastConnectionTime = 0;
 
-  private final double EXIT_INTERVAL = 100.0;
+  private final double EXIT_INTERVAL = 1.0;
 
   public NetworkInterface replicate() {
     return new ExitInterface(this);
