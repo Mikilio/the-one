@@ -70,6 +70,19 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 		humans = new LinkedList<>(controlSystem.getHumanCoords());
 	}
 
+  public ZombieMovement(NoMovement nmv) {
+		super(nmv);
+
+		state = ROAMING;
+		controlSystem = nmv.getControlSystem();
+		id = nextID++;
+		controlSystem.registerZombie(this);
+		nextDestination = null; // No initial roaming destination
+
+		humans = new LinkedList<>(controlSystem.getHumanCoords());
+
+  }
+
 	/**
 	 * Returns a possible (random) placement for a host
 	 * @return Random position on the map

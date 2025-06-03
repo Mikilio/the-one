@@ -1,107 +1,104 @@
 package movement;
 
-import core.Settings;
 import core.Coord;
+import core.NetworkInterface;
+import core.Settings;
+import interfaces.Activatable;
+import routing.ZombieRouter;
 
 public class ApocalypseMovement extends ExtendedMovementModel {
 
-    private static final String IS_ZOMBIE_SETTING = "isZombie";
+  private static final String INITIAL_MOVEMENT_SETTING = "initialMovement";
 
-    private boolean isZombie;
+  /**
+   * Creates a new ApocalypseMovement instance.
+   *
+   * @param settings The settings for the simulation.
+   */
+  public ApocalypseMovement(Settings settings) {
+    super(settings);
+    SwitchableMovement mmInitial =
+        (SwitchableMovement)
+            settings.createIntializedObject(
+                "movement." + settings.getSetting(INITIAL_MOVEMENT_SETTING));
+    if (mmInitial instanceof ZombieMovement) {
+      ZombieMovement zombieMovement = (ZombieMovement) mmInitial;
+      zombieMovement.getControlSystem().registerZombie(zombieMovement);
+    } else if (mmInitial instanceof HumanMovement) {
+      HumanMovement humanMovement = (HumanMovement) mmInitial;
+      humanMovement.getControlSystem().registerHuman(humanMovement);
+    }
+    setCurrentMovementModel(mmInitial);
+  }
 
-    private NoMovement stationaryMovement;
-    private HumanMovement humanMovement;
-    private ZombieMovement zombieMovement;
+  /**
+   * Creates a new ApocalypseMovement instance from a prototype.
+   *
+   * @param amv The ApocalypseMovement to copy.
+   */
+  protected ApocalypseMovement(ApocalypseMovement amv) {
+    super(amv);
+    setCurrentMovementModel(amv.getCurrentMovementModel());
+  }
 
-    /**
-     * Creates a new ApocalypseMovement instance.
-     * @param settings The settings for the simulation.
-     */
-    public ApocalypseMovement(Settings settings) {
-        super(settings);
-        isZombie = settings.getBoolean(IS_ZOMBIE_SETTING, false);
-        if (isZombie) {
-            zombieMovement = new ZombieMovement(settings);
-            setCurrentMovementModel(zombieMovement);
-        } else {
-            humanMovement = new HumanMovement(settings);
-            setCurrentMovementModel(humanMovement);
+  @Override
+  public ApocalypseMovement replicate() {
+    return new ApocalypseMovement(this);
+  }
+
+  @Override
+  public Coord getInitialLocation() {
+    SwitchableMovement curr = getCurrentMovementModel();
+    if (curr instanceof ZombieMovement) {
+      ZombieMovement zombieMovement = (ZombieMovement) curr;
+      return zombieMovement.getInitialLocation();
+    } else if (curr instanceof HumanMovement) {
+      HumanMovement humanMovement = (HumanMovement) curr;
+      return humanMovement.getInitialLocation();
+    } else {
+      NoMovement noMovement = (NoMovement) curr;
+      return noMovement.getInitialLocation();
+    }
+  }
+  ;
+
+  @Override
+  public boolean newOrders() {
+    SwitchableMovement curr = getCurrentMovementModel();
+    if (curr instanceof HumanMovement && getHost().getRouter() instanceof ZombieRouter) {
+      HumanMovement oldMovement = (HumanMovement) curr;
+      oldMovement.getControlSystem().unregisterHuman(oldMovement.getID());
+      ZombieMovement newMovement = new ZombieMovement(oldMovement);
+      setCurrentMovementModel(newMovement);
+      newMovement.getControlSystem().registerZombie(newMovement);
+      return true;
+    }
+    if (curr instanceof HumanMovement || curr instanceof ZombieMovement) {
+      for (Object item : getHost().getInterfaces()) {
+        if (item instanceof Activatable) {
+          Activatable activatable = (Activatable) item;
+          activatable.activate();
         }
+      }
     }
+    return true;
+  }
 
-    /**
-     * Creates a new ApocalypseMovement instance from a prototype.
-     * @param amv The ApocalypseMovement to copy.
-     */
-    protected ApocalypseMovement(ApocalypseMovement amv) {
-        super(amv);
-        isZombie = amv.isZombie;
-        if (amv.zombieMovement != null) {
-            zombieMovement = new ZombieMovement(amv.zombieMovement);
-            setCurrentMovementModel(zombieMovement);
-        } else if (amv.humanMovement != null) {
-            humanMovement = new HumanMovement(amv.humanMovement);
-            setCurrentMovementModel(humanMovement);
-        } else {
-            stationaryMovement = new NoMovement(amv.stationaryMovement);
-            setCurrentMovementModel(stationaryMovement);
-        }    
-    }
+  /** Virtually removes this movement model from the simulation. */
+  public void removeFromSimulation() {
+    SwitchableMovement curr = getCurrentMovementModel();
+    NoMovement noMovement;
+    if (curr instanceof ZombieMovement) {
+      ZombieMovement zombieMovement = (ZombieMovement) curr;
+      zombieMovement.getControlSystem().unregisterZombie(zombieMovement.getID());
+      noMovement = new NoMovement(zombieMovement);
+    } else if (curr instanceof HumanMovement) {
+      HumanMovement humanMovement = (HumanMovement) curr;
+      humanMovement.getControlSystem().unregisterHuman(humanMovement.getID());
+      noMovement = new NoMovement(humanMovement);
+    } else return;
 
-    @Override
-    public ApocalypseMovement replicate() {
-        return new ApocalypseMovement(this);
-    }
-
-    @Override
-    public Coord getInitialLocation() {
-        if (isZombie) {
-            return zombieMovement.getInitialLocation();
-        } else if (humanMovement != null) {
-            return humanMovement.getInitialLocation();
-        } else {
-            return stationaryMovement.getInitialLocation();
-        }
-    }
-
-    @Override
-    public boolean newOrders() {
-        if (humanMovement != null && humanMovement.isCloseToExit()) {
-            removeFromSimulation();
-        }
-        return true;
-    }
-
-    /** 
-     * Turns the current movement model into a zombie movement model.
-     * This method should only be called if the current model is a human movement model.
-     */
-    public void turnIntoZombie() {
-        if (!isZombie) {
-            isZombie = true;
-            if (humanMovement != null) {
-                zombieMovement = new ZombieMovement(humanMovement);
-                humanMovement = null;
-                setCurrentMovementModel(zombieMovement);
-            } else {
-                throw new IllegalStateException("Cannot turn into a zombie without a human movement model.");
-            }
-        }
-    }
-
-    /**
-     * Virtually removes this movement model from the simulation.
-     */
-    public void removeFromSimulation() {
-        if (isZombie) {
-            zombieMovement.getControlSystem().unregisterZombie(zombieMovement.getID());
-            zombieMovement = null;
-        } else {
-            humanMovement.getControlSystem().unregisterHuman(humanMovement.getID());;
-            humanMovement = null;
-        }
-        stationaryMovement = new NoMovement();
-        setCurrentMovementModel(stationaryMovement);
-    }
-    
+    setCurrentMovementModel(noMovement);
+    System.out.println(getHost().getName() + " left the room");
+  }
 }

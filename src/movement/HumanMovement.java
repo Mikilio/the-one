@@ -67,6 +67,20 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 		zombies = new LinkedList<>(hmv.zombies);
 	}
 
+  public HumanMovement(NoMovement nmv) {
+		super(nmv);
+
+		state = FLEEING;
+		controlSystem = nmv.getControlSystem();
+		controlSystem.registerHuman(this);
+		id = nextID++;
+
+		exits = new LinkedList<>(controlSystem.getExits());
+		humans = new LinkedList<>(controlSystem.getHumanCoords());
+		zombies = new LinkedList<>(controlSystem.getZombieCoords());
+
+  }
+
 	/**
 	 * Returns a possible (random) placement for a host
 	 * @return Random position on the map
@@ -119,6 +133,10 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 			c = randomCoord();
 		}
 
+    if (c == null) {
+      return p;
+    }
+
 		// Ensure the new coordinates are within bounds
 		double maxX = getMaxX();
 		double maxY = getMaxY();
@@ -161,14 +179,6 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 
 	public boolean isReady() {
 		return true;
-	}
-
-	public boolean isCloseToExit() {
-		if (exits.isEmpty()) {
-			return false; // No exits available
-		}
-		Coord closestExit = getClosestCoordinate(exits, lastWaypoint);
-		return closestExit.distance(lastWaypoint) < distance;
 	}
 
 	protected Coord randomCoord() {
