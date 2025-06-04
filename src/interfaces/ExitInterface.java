@@ -77,12 +77,13 @@ public class ExitInterface extends SimpleBroadcastInterface implements Activatab
 
       // Then find new possible connections
       Collection<NetworkInterface> interfaces = optimizer.getNearInterfaces(this);
-      if (interfaces.iterator().hasNext()) {
-        lastConnectionTime = simTime;
-        ExitInterface next = (ExitInterface) interfaces.iterator().next();
-        assert next.isActive() : "Inactive interface in grid";
-        connect(next);
+      for (NetworkInterface i : interfaces) {
+        ExitInterface leaver = (ExitInterface) i;
+        assert leaver.isActive() : "Inactive interface in grid";
+        connect(leaver);
+        if (connections.size() > 0) break;
       }
+      lastConnectionTime = simTime;
     }
   }
 

@@ -10,7 +10,7 @@ agentInterface.transmitSpeed = 250k
 agentInterface.transmitRange = 0.5
 exitInterface.type = ExitInterface
 exitInterface.transmitSpeed = 250k
-exitInterface.transmitRange = 0.5
+exitInterface.transmitRange = 1
 # close contact only (~1 meter)
 
 Scenario.nrofHostGroups = 3
@@ -23,7 +23,7 @@ Group.apocalypseControlSystemNr = 0
 Group1.groupID = human
 Group1.movementModel = ApocalypseMovement
 Group1.initialMovement = HumanMovement 
-Group1.router = HumanRouter
+Group1.router = PassiveRouter
 # Custom router to handle infection logic
 Group1.bufferSize = 5M
 Group1.waitTime = 0, 0
@@ -40,7 +40,7 @@ Group1.nrofHosts = 12
 Group2.groupID = zombie
 Group2.movementModel = ApocalypseMovement
 Group2.initialMovement = ZombieMovement
-Group2.router = ZombieRouter
+Group2.router = PassiveRouter
 # Custom router to infect humans
 Group2.bufferSize = 5M
 Group2.waitTime = 0, 0

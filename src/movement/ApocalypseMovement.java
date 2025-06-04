@@ -4,7 +4,7 @@ import core.Coord;
 import core.NetworkInterface;
 import core.Settings;
 import interfaces.Activatable;
-import routing.ZombieRouter;
+import interfaces.AgentInterface;
 
 public class ApocalypseMovement extends ExtendedMovementModel {
 
@@ -59,7 +59,17 @@ public class ApocalypseMovement extends ExtendedMovementModel {
   @Override
   public boolean newOrders() {
     SwitchableMovement curr = getCurrentMovementModel();
-    if (curr instanceof HumanMovement && getHost().getRouter() instanceof ZombieRouter) {
+    AgentInterface currIface = null;
+    for (NetworkInterface i : getHost().getInterfaces()) {
+      if (i instanceof AgentInterface) currIface = (AgentInterface)i;
+    }
+
+    assert currIface != null: "Found an Agent without interface";
+
+    //This is needed form zombies that exist at the start of simulation;
+    if (curr instanceof ZombieMovement) currIface.turn();
+
+    if (curr instanceof HumanMovement && currIface.isZombie()) {
       HumanMovement oldMovement = (HumanMovement) curr;
       oldMovement.getControlSystem().unregisterHuman(oldMovement.getID());
       ZombieMovement newMovement = new ZombieMovement(oldMovement);
