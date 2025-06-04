@@ -16,7 +16,6 @@ exitInterface.transmitRange = 0.5
 Scenario.nrofHostGroups = 3
 
 Group.apocalypseControlSystemNr = 0
-Group.exitsLocations = 0, 0
 
 ################################
 # Group 1: Humans (Students)

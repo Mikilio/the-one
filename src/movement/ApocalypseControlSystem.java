@@ -15,7 +15,6 @@ import java.util.List;
 public class ApocalypseControlSystem {
 
   public static final String APOCALYPSE_CONTROL_SYSTEM_NR = "apocalypseControlSystemNr";
-  public static final String EXITS_LOCATIONS_SETTING = "exitsLocations";
 
   private static HashMap<Integer, ApocalypseControlSystem> systems;
 
@@ -37,15 +36,6 @@ public class ApocalypseControlSystem {
     exits = new LinkedList<>();
     humans = new HashMap<>();
     zombies = new HashMap<>();
-
-    if (s != null) {
-      int[] exitCoords = s.getCsvInts(EXITS_LOCATIONS_SETTING);
-      for (int i = 0; i < exitCoords.length; i += 2) {
-        if (i + 1 < exitCoords.length) {
-          exits.add(new Coord(exitCoords[i], exitCoords[i + 1]));
-        }
-      }
-    }
   }
 
   public static void reset() {
@@ -87,15 +77,17 @@ public class ApocalypseControlSystem {
     zombies.remove(zombieID);
   }
 
+  public void registerExit(Coord exit) {
+    if (!exits.contains(exit)) {
+      exits.add(exit);
+    }
+  }
+
   /**
    * @return A list of all exits belonging to this system
    */
   public List<Coord> getExits() {
     return exits;
-  }
-
-  public void setExits(List<Coord> exits) {
-    this.exits = exits;
   }
 
   public List<Coord> getHumanCoords() {

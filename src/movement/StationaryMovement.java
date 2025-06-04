@@ -26,6 +26,10 @@ public class StationaryMovement extends MovementModel {
 
 		coords = s.getCsvInts(LOCATION_S, 2);
 		this.loc = new Coord(coords[0],coords[1]);
+
+		int acs = s.getInt(ApocalypseControlSystem.APOCALYPSE_CONTROL_SYSTEM_NR);
+		ApocalypseControlSystem controlSystem = ApocalypseControlSystem.getApocalypseControlSystem(s,acs);
+		controlSystem.registerExit(this.loc);
 	}
 
 	/**
@@ -35,6 +39,8 @@ public class StationaryMovement extends MovementModel {
 	public StationaryMovement(StationaryMovement sm) {
 		super(sm);
 		this.loc = sm.loc;
+
+		// no need to register again, as this is a copy with the same location
 	}
 
 	/**
