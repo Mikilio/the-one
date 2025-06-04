@@ -4,14 +4,14 @@
  */
 package core;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import movement.MovementModel;
 import movement.Path;
 import routing.MessageRouter;
 import routing.util.RoutingInfo;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import static core.Constants.DEBUG;
 
@@ -30,7 +30,9 @@ public class DTNHost implements Comparable<DTNHost> {
 	private Path path;
 	private double speed;
 	private double nextTimeToMove;
+	public final String groupId;
 	private String name;
+	protected String intialName;
 	private List<MessageListener> msgListeners;
 	private List<MovementListener> movListeners;
 	private List<NetworkInterface> net;
@@ -51,14 +53,16 @@ public class DTNHost implements Comparable<DTNHost> {
 	 * @param mRouterProto Prototype of the message router of this host
 	 */
 	public DTNHost(List<MessageListener> msgLs,
-			List<MovementListener> movLs,
-			String groupId, List<NetworkInterface> interf,
-			ModuleCommunicationBus comBus,
-			MovementModel mmProto, MessageRouter mRouterProto) {
+				   List<MovementListener> movLs,
+				   String groupId, List<NetworkInterface> interf,
+				   ModuleCommunicationBus comBus,
+				   MovementModel mmProto, MessageRouter mRouterProto) {
 		this.comBus = comBus;
 		this.location = new Coord(0,0);
 		this.address = getNextAddress();
+		this.groupId = groupId;
 		this.name = groupId+address;
+		this.intialName = name;
 		this.net = new ArrayList<NetworkInterface>();
 
 		for (NetworkInterface i : interf) {
@@ -131,7 +135,7 @@ public class DTNHost implements Comparable<DTNHost> {
 	 * Set a router for this host
 	 * @param router The router to set
 	 */
-	private void setRouter(MessageRouter router) {
+	public void setRouter(MessageRouter router) {
 		router.init(this, msgListeners);
 		this.router = router;
 	}
@@ -142,6 +146,14 @@ public class DTNHost implements Comparable<DTNHost> {
 	 */
 	public MessageRouter getRouter() {
 		return this.router;
+	}
+
+	/**
+	 * Returns the router of this host
+	 * @return the router of this host
+	 */
+	public MovementModel getMovement() {
+		return this.movement;
 	}
 
 	/**
@@ -159,7 +171,7 @@ public class DTNHost implements Comparable<DTNHost> {
 		return this.comBus;
 	}
 
-    /**
+	/**
 	 * Informs the router of this host about state change in a connection
 	 * object.
 	 * @param con  The connection object whose state changed
@@ -212,12 +224,32 @@ public class DTNHost implements Comparable<DTNHost> {
 		this.location = location.clone();
 	}
 
+	//Method that pauses movement of a node for time in seconds
+	public void pauseMovement(double seconds) {
+		if (DEBUG) Debug.p("Pausing movement for " + seconds + " seconds");
+		this.nextTimeToMove = SimClock.getTime() + seconds;
+		this.destination = null; // clear destination so that it will be set again
+		if (movListeners != null) {
+			for (MovementListener l : movListeners) {
+				//	l.paused(this, seconds);
+			}
+		}
+	}
+
+
 	/**
 	 * Sets the Node's name overriding the default name (groupId + netAddress)
 	 * @param name The name to set
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getName() {
+		return name;
+	}
+	public String getInitialName() {
+		return intialName;
 	}
 
 	/**
@@ -293,7 +325,7 @@ public class DTNHost implements Comparable<DTNHost> {
 	 * Force a connection event
 	 */
 	public void forceConnection(DTNHost anotherHost, String interfaceId,
-			boolean up) {
+								boolean up) {
 		NetworkInterface ni;
 		NetworkInterface no;
 
@@ -308,7 +340,7 @@ public class DTNHost implements Comparable<DTNHost> {
 			no = anotherHost.getInterface(1);
 
 			assert (ni.getInterfaceType().equals(no.getInterfaceType())) :
-				"Interface types do not match.  Please specify interface type explicitly";
+					"Interface types do not match.  Please specify interface type explicitly";
 		}
 
 		if (up) {
@@ -323,7 +355,7 @@ public class DTNHost implements Comparable<DTNHost> {
 	 */
 	public void connect(DTNHost h) {
 		if (DEBUG) Debug.p("WARNING: using deprecated DTNHost.connect" +
-			"(DTNHost) Use DTNHost.forceConnection(DTNHost,null,true) instead");
+				"(DTNHost) Use DTNHost.forceConnection(DTNHost,null,true) instead");
 		forceConnection(h,null,true);
 	}
 
@@ -357,7 +389,7 @@ public class DTNHost implements Comparable<DTNHost> {
 
 			// Destroy all connections
 			List<NetworkInterface> removeList =
-				new ArrayList<NetworkInterface>(conns.size());
+					new ArrayList<NetworkInterface>(conns.size());
 			for (Connection con : conns) {
 				removeList.add(con.getOtherInterface(i));
 			}
@@ -394,7 +426,6 @@ public class DTNHost implements Comparable<DTNHost> {
 			this.location.setLocation(this.destination); // snap to destination
 			possibleMovement -= distance;
 			if (!setNextWaypoint()) { // get a new waypoint
-				this.destination = null; // No more waypoints left, therefore the destination must be null
 				return; // no more waypoints left
 			}
 			distance = this.location.distance(this.destination);
