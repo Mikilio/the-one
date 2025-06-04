@@ -18,17 +18,17 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 	public static final int ROAMING = 1;
 	public static final int CHASING = 2;
 
-	public static final double DETECTION_RADIUS = 1000; // Radius for detecting other entities
+	public static final double DETECTION_RADIUS = 20; // Radius for detecting other entities
 
 	private int id;
-	private static int nextID = 0;
+	protected static int nextID = 0;
 	private ApocalypseControlSystem controlSystem;
 
 	private int state;
 
 	private Coord lastWaypoint;
 	private Coord nextDestination;
-	private final double distance = 10; // distance to move before recalculating path
+	private final double distance = 1; // distance to move before recalculating path
 
 	private List<Coord> humans;
 

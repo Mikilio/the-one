@@ -9,6 +9,7 @@ import routing.ZombieRouter;
 public class ApocalypseMovement extends ExtendedMovementModel {
 
   private static final String INITIAL_MOVEMENT_SETTING = "initialMovement";
+  
 
   /**
    * Creates a new ApocalypseMovement instance.
@@ -31,7 +32,7 @@ public class ApocalypseMovement extends ExtendedMovementModel {
    */
   protected ApocalypseMovement(ApocalypseMovement amv) {
     super(amv);
-    setCurrentMovementModel(amv.getCurrentMovementModel());
+    setCurrentMovementModel((SwitchableMovement)((MovementModel) amv.getCurrentMovementModel()).replicate());
   }
 
   @Override

@@ -29,7 +29,7 @@ public class ApocalypseControlSystem {
   }
 
   /**
-   * Creates a new instance of ontrolSystem without any entities.
+   * Creates a new instance of ApocalypseControlSystem without any entities.
    *
    * @param systemID The unique ID of this system.
    */
