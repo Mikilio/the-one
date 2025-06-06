@@ -4,10 +4,10 @@
  */
 package input;
 
-import core.DTNHost;
-import core.NetworkInterface;
-import core.World;
 import java.util.Iterator;
+
+import core.DTNHost;
+import core.World;
 import movement.ApocalypseMovement;
 import movement.HumanMovement;
 import movement.NoMovement;

@@ -84,6 +84,14 @@ public class ApocalypseMovement extends ExtendedMovementModel {
         }
       }
     }
+    if (curr instanceof NoMovement ) {
+      for (Object item : getHost().getInterfaces()) {
+        if (item instanceof Activatable) {
+          Activatable activatable = (Activatable) item;
+          activatable.deactivate();
+        }
+      }
+    }
     return true;
   }
 

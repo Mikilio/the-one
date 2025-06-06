@@ -1,8 +1,8 @@
 Scenario.name = classroom_zombie
 Scenario.simulateConnections = true
 Scenario.updateInterval = 0.01
-Scenario.endTime = 1000
-# ~16 min
+Scenario.endTime = 5000
+# ~1h 23min
 
 # Communication settings
 agentInterface.type = AgentInterface
@@ -13,20 +13,18 @@ exitInterface.transmitSpeed = 250k
 exitInterface.transmitRange = 1
 # close contact only (~1 meter)
 
-Scenario.nrofHostGroups = 3
+Scenario.nrofHostGroups = 4
 
 Group.apocalypseControlSystemNr = 0
 
 ################################
 # Group 1: Random Humans (Students)
 ################################
-Group1.groupID = human
+Group1.groupID = rH
 Group1.movementModel = ApocalypseMovement
 Group1.initialMovement = HumanMovement 
 Group1.router = PassiveRouter
 # Custom router to handle infection logic
-Group1.bufferSize = 5M
-Group1.waitTime = 0, 0
 Group1.nrofInterfaces = 2
 Group1.interface1 = agentInterface
 Group1.interface2 = exitInterface
@@ -37,12 +35,10 @@ Group1.nrofHosts = 12
 ################################
 # Group 2: Random Zombies
 ################################
-Group2.groupID = zombie
+Group2.groupID = rZ
 Group2.movementModel = ApocalypseMovement
 Group2.initialMovement = ZombieMovement
 Group2.router = PassiveRouter
-Group2.bufferSize = 5M
-Group2.waitTime = 0, 0
 Group2.nrofInterfaces = 2
 Group2.interface1 = agentInterface
 Group2.interface2 = exitInterface
@@ -52,7 +48,7 @@ Group2.nrofHosts = 2
 ################################
 # Group 3: Exit
 ################################
-Group3.groupID = exit
+Group3.groupID = 1e
 Group3.movementModel = StationaryMovement
 Group3.router = PassiveRouter
 Group3.nrofInterfaces = 1
@@ -60,6 +56,19 @@ Group3.interface1 = exitInterface
 Group3.nodeLocation = 0, 0
 Group3.nrofHosts = 1
 
+################################
+# Group 4: Entrance for 1e 
+################################
+Group4.groupID = e1e
+Group4.movementModel = ApocalypseMovement
+Group4.initialMovement = NoMovement
+Group4.router = PassiveRouter
+Group4.nrofInterfaces = 2
+Group4.interface1 = agentInterface
+Group4.interface2 = exitInterface
+Group4.nodeLocation = 30, 20
+Group2.speed = 0.5, 1.5
+Group4.nrofHosts = 3
 
 
 
@@ -67,7 +76,7 @@ Group3.nrofHosts = 1
 # Movement model settings
 ##############################
 MovementModel.rngSeed = 1
-MovementModel.worldSize = 20 , 15
+MovementModel.worldSize = 30 , 20
 # classroom size
 # short warmup
 MovementModel.warmup = 10
@@ -76,14 +85,15 @@ MovementModel.warmup = 10
 ##############################
 # Infection event handling
 ##############################
-Events.nrof = 0
+Events.nrof = 1
+Events1.filePath = reports/apocalypse/e1e.binee
 
 ##############################
 # Reporting
 ##############################
+ExitReport.Report.reportDir = reports/apocalypse/
 Report.nrofReports = 1
 Report.warmup = 0
-Report.reportDir = reports/
 Report.report1 = ExitReport
 
 ##############################

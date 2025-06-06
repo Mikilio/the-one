@@ -10,6 +10,7 @@ import core.Settings;
 import core.SimClock;
 import java.util.Collection;
 import movement.ApocalypseMovement;
+import test.StationaryMovement;
 
 /**
  * A Network Interface that connects to LeverInterfaces one at a time. A host with this interface
@@ -26,7 +27,7 @@ public class ExitInterface extends SimpleBroadcastInterface implements Activatab
   /** Reads the interface settings from the Settings file */
   public ExitInterface(Settings s) {
     super(s);
-    active = true; // TODO: this is actually a bad idea instead handle in register
+    active = true;
   }
 
   /**
@@ -45,6 +46,9 @@ public class ExitInterface extends SimpleBroadcastInterface implements Activatab
 
   @Override
   public void update() {
+    if (getHost().getMovement() instanceof StationaryMovement) {
+      System.out.println("OK");
+    }
     if (optimizer == null) {
       return; /* nothing to do */
     }
