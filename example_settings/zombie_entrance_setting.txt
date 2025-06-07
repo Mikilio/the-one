@@ -5,9 +5,11 @@ Scenario.endTime = 5000
 # ~1h 23min
 
 # Communication settings
+#Interaction Human - Zombie
 agentInterface.type = AgentInterface
 agentInterface.transmitSpeed = 250k
 agentInterface.transmitRange = 0.5
+#Interactino Human & Zombie - Exit
 exitInterface.type = ExitInterface
 exitInterface.transmitSpeed = 250k
 exitInterface.transmitRange = 1
@@ -23,12 +25,12 @@ Group.apocalypseControlSystemNr = 0
 Group1.groupID = rH
 Group1.movementModel = ApocalypseMovement
 Group1.initialMovement = HumanMovement 
-Group1.router = PassiveRouter
+Group1.router = PassiveRouter #Can be changed to global for all
 # Custom router to handle infection logic
 Group1.nrofInterfaces = 2
 Group1.interface1 = agentInterface
 Group1.interface2 = exitInterface
-Group1.speed = 0.8, 1
+Group1.speed = 0.8, 1 #measured in m/s, perhaps not needed configurated and set later in function (SwitchableMovement)
 Group1.nrofHosts = 12
 
 
@@ -48,8 +50,8 @@ Group2.nrofHosts = 2
 ################################
 # Group 3: Exit
 ################################
-Group3.groupID = 1e
-Group3.movementModel = StationaryMovement
+Group3.groupID = 1e # Exit number + e
+Group3.movementModel = StationaryMovement #Always stationary
 Group3.router = PassiveRouter
 Group3.nrofInterfaces = 1
 Group3.interface1 = exitInterface
@@ -76,8 +78,8 @@ Group4.nrofHosts = 3
 # Movement model settings
 ##############################
 MovementModel.rngSeed = 1
-MovementModel.worldSize = 30 , 20
 # classroom size
+MovementModel.worldSize = 30 , 20
 # short warmup
 MovementModel.warmup = 10
 
@@ -85,15 +87,17 @@ MovementModel.warmup = 10
 ##############################
 # Infection event handling
 ##############################
-Events.nrof = 1
+Events.nrof = 1 #One event per Entrance
 Events1.filePath = reports/apocalypse/e1e.binee
 
+
+
+# No need to change
 ##############################
 # Reporting
 ##############################
 ExitReport.Report.reportDir = reports/apocalypse/
 Report.nrofReports = 1
-Report.warmup = 0
 Report.report1 = ExitReport
 
 ##############################
