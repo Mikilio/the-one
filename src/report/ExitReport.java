@@ -76,7 +76,9 @@ public class ExitReport extends Report implements ConnectionListener {
       Boolean zombie = h2.getMovement() instanceof ApocalypseMovement;
       for (ExitLog log : logs) {
         if (log.groupId == h1.groupId) {
-          log.events.add(new ExitEvent("e" + h1.groupId, zombie, getSimTime()));
+          double time = getSimTime();
+          log.events.add(new ExitEvent("e" + h1.groupId, zombie, time));
+          System.out.println("Exit: " + (zombie ? "Zombie" : "Human") + " @" + time + " ->"+h1.groupId);
           return;
         }
       }

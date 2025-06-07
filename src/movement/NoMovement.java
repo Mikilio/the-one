@@ -34,7 +34,7 @@ public class NoMovement extends MovementModel implements SwitchableMovement {
      */
     public NoMovement(NoMovement sm) {
         super(sm);
-        this.loc = sm.loc;
+        this.loc = sm.loc != null ? sm.loc.clone() : null;
         this.controlSystem = sm.getControlSystem();
     }
     public NoMovement(HumanMovement sm) {
