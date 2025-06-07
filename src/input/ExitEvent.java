@@ -36,15 +36,32 @@ public class ExitEvent extends ExternalEvent {
 
 	@Override
 	public void processEvent(World world) {
+    System.out.println("---------------------------------------------");
 		Iterator<DTNHost> hosts = world.getHosts().iterator();
     DTNHost newActor;
     while (hosts.hasNext()) {
       newActor = hosts.next();
-      if (newActor.groupId != groupId) {continue;}
+      if (!newActor.groupId.contentEquals(groupId)) {continue;}
+      ApocalypseMovement movement = (ApocalypseMovement)newActor.getMovement();
+      if (movement.getCurrentMovementModel() instanceof NoMovement) {
+        NoMovement nom = (NoMovement) movement.getCurrentMovementModel();
+        System.out.println(this);
+        System.out.println(newActor);
+        System.out.println(nom.getLastLocation());
+      }
+    }
+    System.out.println("-------------");
+		hosts = world.getHosts().iterator();
+    while (hosts.hasNext()) {
+      newActor = hosts.next();
+      if (!newActor.groupId.contentEquals(groupId)) {continue;}
       ApocalypseMovement movement = (ApocalypseMovement)newActor.getMovement();
       if (movement.getCurrentMovementModel() instanceof NoMovement) {
         NoMovement nom = (NoMovement) movement.getCurrentMovementModel();
         movement.setCurrentMovementModel(zombie ? new ZombieMovement(nom) : new HumanMovement(nom));
+        System.out.println(this);
+        System.out.println(newActor);
+        System.out.println(nom.getLastLocation());
         return;
       }
     }
@@ -52,6 +69,6 @@ public class ExitEvent extends ExternalEvent {
 
 	@Override
 	public String toString() {
-    return "EX: " + (zombie ? "Zombie" : "Human") + " @" + this.time + " ->"+this.groupId;
+    return "Entry: " + (zombie ? "Zombie" : "Human") + " @" + this.time + " ->"+this.groupId;
 	}
 }

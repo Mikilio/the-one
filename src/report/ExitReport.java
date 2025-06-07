@@ -3,8 +3,10 @@ package report;
 import core.ConnectionListener;
 import core.DTNHost;
 import core.Settings;
+import core.SimError;
 import core.SimScenario;
 import input.BinaryEventsReader;
+import input.ExitEvent;
 import input.ExternalEvent;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,10 +31,10 @@ public class ExitReport extends Report implements ConnectionListener {
 
     public void done() {
       try {
-        BinaryEventsReader.storeToBinaryFile(reportDir + groupId, events);
+        BinaryEventsReader.storeToBinaryFile(reportDir + "e" + groupId, events);
       } catch (IOException e) {
+        throw new SimError("Coudn't write Logs for exit: " + groupId);
       }
-      ;
     }
   }
 
@@ -54,7 +56,7 @@ public class ExitReport extends Report implements ConnectionListener {
 
     List<String> exits = getExits();
     for (String exit : exits) {
-      logs.add(new ExitLog("e" + exit));
+      logs.add(new ExitLog(exit));
     }
   }
 
@@ -72,10 +74,12 @@ public class ExitReport extends Report implements ConnectionListener {
     if (h1.getMovement() instanceof StationaryMovement) {
 
       Boolean zombie = h2.getMovement() instanceof ApocalypseMovement;
-      String line = String.join(" ", "e" + h1.groupId, zombie.toString(), createTimeStamp());
-
-      newEvent();
-      write(line);
+      for (ExitLog log : logs) {
+        if (log.groupId == h1.groupId) {
+          log.events.add(new ExitEvent("e" + h1.groupId, zombie, getSimTime()));
+          return;
+        }
+      }
     }
   }
 
@@ -86,10 +90,6 @@ public class ExitReport extends Report implements ConnectionListener {
    *
    * @return time stamp of the current simulation time
    */
-  private String createTimeStamp() {
-    return String.format("%.2f", getSimTime());
-  }
-
   public static List<String> getExits() {
     List<String> entrances = new ArrayList<String>();
     Settings s = new Settings(SimScenario.SCENARIO_NS);

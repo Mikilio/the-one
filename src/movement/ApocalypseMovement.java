@@ -9,7 +9,6 @@ import interfaces.AgentInterface;
 public class ApocalypseMovement extends ExtendedMovementModel {
 
   private static final String INITIAL_MOVEMENT_SETTING = "initialMovement";
-  
 
   /**
    * Creates a new ApocalypseMovement instance.
@@ -32,7 +31,8 @@ public class ApocalypseMovement extends ExtendedMovementModel {
    */
   protected ApocalypseMovement(ApocalypseMovement amv) {
     super(amv);
-    setCurrentMovementModel((SwitchableMovement)((MovementModel) amv.getCurrentMovementModel()).replicate());
+    setCurrentMovementModel(
+        (SwitchableMovement) ((MovementModel) amv.getCurrentMovementModel()).replicate());
   }
 
   @Override
@@ -61,12 +61,12 @@ public class ApocalypseMovement extends ExtendedMovementModel {
     SwitchableMovement curr = getCurrentMovementModel();
     AgentInterface currIface = null;
     for (NetworkInterface i : getHost().getInterfaces()) {
-      if (i instanceof AgentInterface) currIface = (AgentInterface)i;
+      if (i instanceof AgentInterface) currIface = (AgentInterface) i;
     }
 
-    assert currIface != null: "Found an Agent without interface";
+    assert currIface != null : "Found an Agent without interface";
 
-    //This is needed form zombies that exist at the start of simulation;
+    // This is needed form zombies that exist at the start of simulation;
     if (curr instanceof ZombieMovement) currIface.turn();
 
     if (curr instanceof HumanMovement && currIface.isZombie()) {
@@ -84,7 +84,7 @@ public class ApocalypseMovement extends ExtendedMovementModel {
         }
       }
     }
-    if (curr instanceof NoMovement ) {
+    if (curr instanceof NoMovement) {
       for (Object item : getHost().getInterfaces()) {
         if (item instanceof Activatable) {
           Activatable activatable = (Activatable) item;
@@ -117,6 +117,5 @@ public class ApocalypseMovement extends ExtendedMovementModel {
     } else return;
 
     setCurrentMovementModel(noMovement);
-    System.out.println(getHost().getName() + " left the room");
   }
 }

@@ -58,7 +58,9 @@ public class AgentInterface extends SimpleBroadcastInterface implements Activata
       if (r < TURNING_RATE) {
         human.pauseMovement(100);
         zombie.pauseMovement(10);
-        human.setName("zombie (Ex: " + getHost().getInitialName() + ")");
+        if (!isZombie) {
+          human.setName("z<-" + getHost().getInitialName());
+        }
         this.turn();
         other.turn();
         return;

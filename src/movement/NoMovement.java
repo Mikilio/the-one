@@ -35,14 +35,17 @@ public class NoMovement extends MovementModel implements SwitchableMovement {
     public NoMovement(NoMovement sm) {
         super(sm);
         this.loc = sm.loc;
+        this.controlSystem = sm.getControlSystem();
     }
     public NoMovement(HumanMovement sm) {
       super(sm);
       this.loc = sm.getLastLocation();
+      this.controlSystem = sm.getControlSystem();
     }
     public NoMovement(ZombieMovement sm) {
       super(sm);
       this.loc = sm.getLastLocation();
+      this.controlSystem = sm.getControlSystem();
     }
 
     @Override

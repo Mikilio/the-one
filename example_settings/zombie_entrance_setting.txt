@@ -50,7 +50,7 @@ Group2.speed = 0.5, 1.5
 Group2.nrofHosts = 2
 
 ################################
-# Group 3: Exit
+# Group 3: Exit 1e
 ################################
 # Exit number + e
 Group3.groupID = 1e
