@@ -1,0 +1,11 @@
+source;targets;roomSizeX;roomSizeY;nrOfHumans;nrOfZombies;simulationTime;numberOfRuns
+originClassRoom;FingerHallwayInfectionOrigin;5;6;30;1;120;1
+FingerHallwayInfectionOrigin;ClassRoomSameFinger, BalconyNordEtage1;10;2;20;0;100;1
+ClassRoomSameFinger;;5;6;30;0;120;19
+BalconyNordEtage1;FingerHallwayUninfected, Bridge;8;3;10;0;100;1
+FingerHallwayUninfected;classRoomSameFloor;10;2;20;0;100;5
+Bridge;Stairs;5;2;2;0;60;2
+classRoomSameFloor;;5;6;30;0;120;80
+Stairs;OtherFloors, Magistrale;3;10;4;0;80;4
+OtherFloors;;200;20;50;0;250;1
+Magistrale;;200;20;1000;0;500;1
