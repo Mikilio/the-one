@@ -121,7 +121,7 @@ public class MainZombieApocalypse {
                 "# Movement model settings\n" +
                 "##############################\n" +
                 runs +
-                "# classroom size\n" +
+                "\n# classroom size\n" +
                 "MovementModel.worldSize = " + RoomSizeX + " , " + RoomSizeY + "\n" +
                 "# short warmup\n" +
                 "MovementModel.warmup = 10\n" +
