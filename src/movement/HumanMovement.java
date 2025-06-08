@@ -289,7 +289,7 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 	 * Calculates an exponention repulsion vector between two coordinates.
 	 * The vector is scaled by a constant and an exponent.
 	 * 
-	 * v = k * exp(-a * dist) * (c - other) / dist
+	 * v = k * a^(- dist) * (c - other) / dist
 	 * 
 	 * @param c The coordinate from which the repulsion is calculated.
 	 * @param other The coordinate to which the repulsion is directed.
@@ -306,8 +306,8 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 			return new Coord(0,0); // Avoid division by zero
 		}
 		return new Coord(
-			- k * Math.exp(-a * dist) * dx / dist, 
-			- k * Math.exp(-a * dist) * dy / dist
+			- k * Math.exp(- Math.log(a) * dist) * dx / dist, 
+			- k * Math.exp(- Math.log(a) * dist) * dy / dist
 		);
 	}
 }
