@@ -3,6 +3,7 @@ package movement;
 import core.Coord;
 import core.DTNSim;
 import core.Settings;
+import core.Tuple;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,7 +21,7 @@ public class ApocalypseControlSystem {
 
   private HashMap<Integer, HumanMovement> humans;
   private HashMap<Integer, ZombieMovement> zombies;
-  private List<Coord> exits;
+  private List<Tuple<Coord, Integer>> exits;
 
   static {
     DTNSim.registerForReset(BusControlSystem.class.getCanonicalName());
@@ -77,7 +78,8 @@ public class ApocalypseControlSystem {
     zombies.remove(zombieID);
   }
 
-  public void registerExit(Coord exit) {
+  public void registerExit(Coord c, int priority) {
+    Tuple<Coord, Integer> exit = new Tuple<>(c, priority);
     if (!exits.contains(exit)) {
       exits.add(exit);
     }
@@ -86,7 +88,7 @@ public class ApocalypseControlSystem {
   /**
    * @return A list of all exits belonging to this system
    */
-  public List<Coord> getExits() {
+  public List<Tuple<Coord, Integer>> getExits() {
     return exits;
   }
 

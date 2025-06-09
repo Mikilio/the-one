@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import movement.ApocalypseMovement;
-import movement.StationaryMovement;
+import movement.ExitMovement;
 
 /**
  * Link connectivity report generator for ONE StandardEventsReader input. Connections that start
@@ -71,7 +71,7 @@ public class ExitReport extends Report implements ConnectionListener {
   }
 
   public void hostsConnected(DTNHost h1, DTNHost h2) {
-    if (h1.getMovement() instanceof StationaryMovement) {
+    if (h1.getMovement() instanceof ExitMovement) {
 
       Boolean zombie = h2.getMovement() instanceof ApocalypseMovement;
       for (ExitLog log : logs) {

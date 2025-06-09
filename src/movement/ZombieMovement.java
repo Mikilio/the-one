@@ -2,7 +2,7 @@ package movement;
 
 import core.Coord;
 import core.Settings;
-
+import core.Tuple;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,6 +31,7 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 	private final double distance = 1; // distance to move before recalculating path
 
 	private List<Coord> humans;
+	private List<Tuple<Coord, Integer>> exits;
 
 	public ZombieMovement(Settings settings) {
 		super(settings);
@@ -80,7 +81,6 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 		nextDestination = null; // No initial roaming destination
 
 		humans = new LinkedList<>(controlSystem.getHumanCoords());
-
   }
 
 	/**
@@ -180,8 +180,20 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 			state = CHASING; // Change state to chasing
 			return true;
 		} else {
-			state = ROAMING; // No humans detected, continue roaming
-			return false;
+			exits = controlSystem.getExits();
+			LinkedList<Coord> exitsCoords = new LinkedList<>();
+			for (Tuple<Coord, Integer> exit : exits) {
+				exitsCoords.add(exit.getFirst());
+			}
+			Coord closestExit = getClosestCoordinate(exitsCoords, lastWaypoint);
+			if (closestExit != null && closestExit.distance(lastWaypoint) <= DETECTION_RADIUS) {
+				nextDestination = closestExit.clone();
+				state = CHASING;
+				return true;
+			} else {
+				state = ROAMING; // No humans detected, continue roaming
+				return false;
+			}
 		}
 	}
 

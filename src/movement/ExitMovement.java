@@ -10,31 +10,43 @@ import core.Settings;
 /**
  * A dummy stationary "movement" model where nodes do not move.
  * Might be useful for simulations with only external connection events.
+ * 
+ * @author Bisma Baubeau
  */
-public class StationaryMovement extends MovementModel {
+public class ExitMovement extends MovementModel {
 	/** Per node group setting for setting the location ({@value}) */
 	public static final String LOCATION_S = "nodeLocation";
+	public static final String PRIORITY_S = "priority";
 	private Coord loc; /** The location of the nodes */
+	private int priority; /** The priority of the exit */
 
 	/**
 	 * Creates a new movement model based on a Settings object's settings.
 	 * @param s The Settings object where the settings are read from
 	 */
-	public StationaryMovement(Settings s) {
+	public ExitMovement(Settings s) {
 		super(s);
 		int coords[];
 
 		coords = s.getCsvInts(LOCATION_S, 2);
 		this.loc = new Coord(coords[0],coords[1]);
+		this.priority = s.getInt(PRIORITY_S, 1);
+
+		int acs = s.getInt(ApocalypseControlSystem.APOCALYPSE_CONTROL_SYSTEM_NR);
+		ApocalypseControlSystem controlSystem = ApocalypseControlSystem.getApocalypseControlSystem(s,acs);
+		controlSystem.registerExit(this.loc, this.priority);
 	}
 
 	/**
 	 * Copy constructor.
 	 * @param sm The StationaryMovement prototype
 	 */
-	public StationaryMovement(StationaryMovement sm) {
+	public ExitMovement(ExitMovement sm) {
 		super(sm);
 		this.loc = sm.loc;
+		this.priority = sm.priority;
+
+		// no need to register again, as this is a copy with the same location
 	}
 
 	/**
@@ -63,8 +75,8 @@ public class StationaryMovement extends MovementModel {
 	}
 
 	@Override
-	public StationaryMovement replicate() {
-		return new StationaryMovement(this);
+	public ExitMovement replicate() {
+		return new ExitMovement(this);
 	}
 
 }

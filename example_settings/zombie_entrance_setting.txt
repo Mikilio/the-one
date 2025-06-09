@@ -55,7 +55,7 @@ Group2.nrofHosts = 2
 # Exit number + e
 Group3.groupID = 1e
  #Always stationary
-Group3.movementModel = StationaryMovement
+Group3.movementModel = ExitMovement
 Group3.router = PassiveRouter
 Group3.nrofInterfaces = 1
 Group3.interface1 = exitInterface

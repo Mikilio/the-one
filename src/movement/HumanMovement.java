@@ -2,7 +2,7 @@ package movement;
 
 import core.Coord;
 import core.Settings;
-
+import core.Tuple;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,9 +33,9 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 
 	private Coord lastWaypoint;
 	private Coord walkingDestination; // for WALKING state
-	private final double distance = 1; // distance to move before recalculating path (TODO: change)
+	private final double distance = 1; // distance to move before recalculating path
 
-	private List<Coord> exits;
+	private List<Tuple<Coord, Integer>> exits;
 	private List<Coord> humans;
 	private List<Coord> zombies;
 
@@ -196,13 +196,20 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 		return false;
 	}
 
-	private Coord calculateFleeingPath(Coord currentLocation, List<Coord> exits, List<Coord> humans, List<Coord> zombies) {
+	private Coord calculateFleeingPath(Coord currentLocation, List<Tuple<Coord,Integer>> exits, List<Coord> humans, List<Coord> zombies) {
 		double x = currentLocation.getX();
 		double y = currentLocation.getY();
 		Coord e;
-		// Select the closest attraction point or a 0,0 if none are available
+		// Select the exit depending on the priority
+		// p = priority / sum(priorities)
 		if (!exits.isEmpty()) {
-			e = getClosestCoordinate(exits, currentLocation);
+			List<Coord> drawList = new LinkedList<>();
+			for (Tuple<Coord, Integer> exit : exits) {
+				for (int i = 0; i < exit.getSecond(); i++) {
+					drawList.add(exit.getFirst());
+				}
+			}
+			e = drawList.get(rng.nextInt(drawList.size()));
 		} else {
 			e = currentLocation.clone();
 		}
