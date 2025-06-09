@@ -199,6 +199,8 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 	private Coord calculateFleeingPath(Coord currentLocation, List<Tuple<Coord,Integer>> exits, List<Coord> humans, List<Coord> zombies) {
 		double x = currentLocation.getX();
 		double y = currentLocation.getY();
+		double dx = 0;
+		double dy = 0;
 		Coord e;
 		// Select the exit depending on the priority
 		// p = priority / sum(priorities)
@@ -216,12 +218,10 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 
 		// Normalized vector towards the closest attraction point
 		double dist = currentLocation.distance(e);
-		if (dist == 0) {
-			// If the last waypoint is the same as the attraction point, we can skip the movement
-			return null;
+		if (dist != 0) {
+			dx += e.getX() - x / dist;
+			dy += e.getY() - y / dist;
 		}
-		double dx = e.getX() - x / dist;
-		double dy = e.getY() - y / dist;
 
 		// Adding repulsion
 		for (Coord h : humans) {
