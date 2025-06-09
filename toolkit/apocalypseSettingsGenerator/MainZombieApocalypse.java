@@ -14,57 +14,75 @@ public class MainZombieApocalypse {
 
     //Function to create a settings file for a specific node
     private static void createSettingsFile(String name, double RoomSizeX, double RoomSizeY, int nrOfHumans, int nrOfZombies, int simulationTime, Set<RoomEdge> incomingEdges, Set<RoomEdge> outgoingEdges, int numberOfRuns) throws IOException {
+
+        int groupCounter = 3;
+
+
         String entrances = "";
-        String exits = "################################\n" +
-                "# Group 3: Exit\n" +
-                "################################\n" +
-                "# Exit number + e\n";
+        String exits = "";
         String runs = "";
         String events = "";
 
-        if(!incomingEdges.isEmpty()){
+
+        //Logic to create settings for Exits
+        for (RoomEdge edge : outgoingEdges) {
+
+            exits = exits.concat(
+                        "################################\n" +
+                            "# Group " + groupCounter + ": Exit\n" +
+                            "################################\n" +
+                            "# Exit number "+ edge.getId()+"e\n" +
+                            "Group" + groupCounter + ".groupID = " + edge.getId() + "e\n" +
+                            "#Always stationary\n" +
+                            "Group" + groupCounter + ".movementModel = StationaryMovement\n" +
+                            "Group" + groupCounter + ".router = PassiveRouter\n" +
+                            "Group" + groupCounter + ".nrofInterfaces = 1\n" +
+                            "Group" + groupCounter + ".interface1 = exitInterface\n" +
+                            "Group" + groupCounter + ".nodeLocation = 0, 0\n" +
+                            "Group" + groupCounter + ".nrofHosts = 1\n\n"
+            );
+            groupCounter++;
+        }
+
+
+        //Logic to create settings for Entrances
+        if (!incomingEdges.isEmpty()) {
             events = events.concat("#One event per Entrance\n" + "Events.nrof = " + incomingEdges.size() + "\n");
         }
         for (RoomEdge edge : incomingEdges) {
             int eventCounter = 1;
             // Assuming the edge represents an entrance, you can modify this logic as needed
             entrances = entrances.concat("################################\n" +
-                    "# Group 4: Entrance for e" + edge.getId() + "e \n" +
+                    "# Group " + groupCounter + ": Entrance for e" + edge.getId() + "e \n" +
                     "################################\n" +
-                    "#Number should be the edge number in the graph \n"  +
-                    "Group4.groupID = e" + edge.getId() + "e\n" +
-                    "Group4.movementModel = ApocalypseMovement\n" +
-                    "Group4.initialMovement = NoMovement\n" +
-                    "Group4.router = PassiveRouter\n" +
-                    "Group4.nrofInterfaces = 2\n" +
-                    "Group4.interface1 = agentInterface\n" +
-                    "Group4.interface2 = exitInterface\n" +
-                    "Group4.nodeLocation = 30, 20\n" +
+                    "#Number should be the edge number in the graph \n" +
+                    "Group" + groupCounter + ".groupID = e" + edge.getId() + "e\n" +
+                    "Group" + groupCounter + ".movementModel = ApocalypseMovement\n" +
+                    "Group" + groupCounter + ".initialMovement = NoMovement\n" +
+                    "Group" + groupCounter + ".router = PassiveRouter\n" +
+                    "Group" + groupCounter + ".nrofInterfaces = 2\n" +
+                    "Group" + groupCounter + ".interface1 = agentInterface\n" +
+                    "Group" + groupCounter + ".interface2 = exitInterface\n" +
+                    "Group" + groupCounter + ".nodeLocation = 30, 20\n" +
                     "Group2.speed = 0.5, 1.5\n" +
 
-                    "Group4.nrofHosts = 3\n" +
+                    "Group" + groupCounter + ".nrofHosts = 3\n" +
                     "\n");
 
             events = events.concat(
-                    "Events"+ eventCounter++ + ".filePath = reports/apocalypse/e" +edge.getId() + "e.binee\n");
-        }
-
-        for(RoomEdge edge : outgoingEdges) {
-            exits = exits.concat("Group3.groupID = "+edge.getId()+"e\n");
+                    "Events" + eventCounter++ + ".filePath = reports/apocalypse/e" + edge.getId() + "e.binee\n");
         }
 
 
-        if(numberOfRuns > 1){
-            runs =  runs.concat("MovementModel.rngSeed = [");
+        if (numberOfRuns > 1) {
+            runs = runs.concat("MovementModel.rngSeed = [");
             for (int i = 1; i < numberOfRuns; i++) {
-                runs = runs.concat(i +";");
+                runs = runs.concat(i + ";");
             }
             runs = runs.concat(numberOfRuns + "]");
-        }else {
+        } else {
             runs = runs.concat("MovementModel.rngSeed = 1\n");
         }
-
-
 
 
         String settings = "Scenario.name = classroom_zombie\n" +
@@ -119,13 +137,7 @@ public class MainZombieApocalypse {
                 "Group2.nrofHosts = " + nrOfZombies + "\n" +
                 "\n" +
                 exits +
-                "\n #Always stationary\n" +
-                "Group3.movementModel = StationaryMovement\n" +
-                "Group3.router = PassiveRouter\n" +
-                "Group3.nrofInterfaces = 1\n" +
-                "Group3.interface1 = exitInterface\n" +
-                "Group3.nodeLocation = 0, 0\n" +
-                "Group3.nrofHosts = 1\n" +
+                "\n " +
                 "\n" +
                 entrances +
                 "\n" +
@@ -173,6 +185,7 @@ public class MainZombieApocalypse {
                 "GUI.EventLogPanel.nrofEvents = 30\n";
         Files.write(Path.of("apocalypse_settings/" + name + ".txt"), settings.getBytes());
     }
+
     //Function to print the Graph including all relevant data and its edges
     private static void printGraph(Graph<RoomNode, RoomEdge> graph) {
         RoomNode start = graph.vertexSet().iterator().next();
@@ -190,6 +203,7 @@ public class MainZombieApocalypse {
             }
         }
     }
+
     //Function that uses the generates settings for each node (Room) in the Graph
     public static void generateSettingsFiles(Graph<RoomNode, RoomEdge> buildingLayout) throws IOException {
 
@@ -199,7 +213,7 @@ public class MainZombieApocalypse {
 
             RoomNode node = iterator.next();
             createSettingsFile(node.name, node.roomSizeX, node.roomSizeY, node.nrOfHumans, node.nrOfZombies, node.simulationTime, buildingLayout.incomingEdgesOf(node), buildingLayout.outgoingEdgesOf(node)
-                    ,node.numberOfRuns);
+                    , node.numberOfRuns);
 
         }
     }
