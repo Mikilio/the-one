@@ -8,11 +8,18 @@ import core.SimScenario;
 import input.BinaryEventsReader;
 import input.ExitEvent;
 import input.ExternalEvent;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import movement.ApocalypseMovement;
 import movement.ExitMovement;
+import movement.ZombieMovement;
 
 /**
  * Link connectivity report generator for ONE StandardEventsReader input. Connections that start
@@ -22,7 +29,7 @@ public class ExitReport extends Report implements ConnectionListener {
 
   private class ExitLog {
     public String groupId;
-    public List<ExternalEvent> events;
+    private List<ExternalEvent> events;
 
     public ExitLog(String groupId) {
       this.groupId = groupId;
@@ -39,6 +46,8 @@ public class ExitReport extends Report implements ConnectionListener {
   }
 
   private String reportDir;
+  private int nrofEscapedHumans;
+  private int nrofEscapedAny;
   private ArrayList<ExitLog> logs;
 
   /** Constructor. */
@@ -68,17 +77,23 @@ public class ExitReport extends Report implements ConnectionListener {
     for (ExitLog log : logs) {
       log.done();
     }
+    writeSummary();
   }
 
   public void hostsConnected(DTNHost h1, DTNHost h2) {
-    if (h1.getMovement() instanceof ExitMovement) {
+    if (h1.getMovement() instanceof ExitMovement
+        && h2.getMovement() instanceof ApocalypseMovement) {
+      ApocalypseMovement agentMovement = (ApocalypseMovement) h2.getMovement();
 
-      Boolean zombie = h2.getMovement() instanceof ApocalypseMovement;
+      Boolean zombie = agentMovement.getCurrentMovementModel() instanceof ZombieMovement;
       for (ExitLog log : logs) {
         if (log.groupId == h1.groupId) {
           double time = getSimTime();
           log.events.add(new ExitEvent("e" + h1.groupId, zombie, time));
-          System.out.println("Exit: " + (zombie ? "Zombie" : "Human") + " @" + time + " ->"+h1.groupId);
+          if (!zombie) nrofEscapedHumans++;
+          nrofEscapedAny++;
+          System.out.println(
+              "Exit: " + (zombie ? "Zombie" : "Human") + " @" + time + " ->" + h1.groupId);
           return;
         }
       }
@@ -105,5 +120,31 @@ public class ExitReport extends Report implements ConnectionListener {
       }
     }
     return entrances;
+  }
+
+  private void writeSummary() {
+    Path summaryDir = Paths.get(reportDir, "summaries");
+    Path summaryFile = summaryDir.resolve(getScenarioName() + ".txt");
+
+    try {
+      // Create directories if they do not exist
+      Files.createDirectories(summaryDir);
+
+      // Use try-with-resources to write to the file
+      try (BufferedWriter writer =
+          Files.newBufferedWriter(
+              summaryFile,
+              StandardCharsets.UTF_8,
+              StandardOpenOption.CREATE,
+              StandardOpenOption.TRUNCATE_EXISTING)) {
+        writer.write(nrofEscapedHumans + " humans escaped\n");
+        writer.write(nrofEscapedAny + " hosts escaped in total\n");
+        for (ExitLog log : logs) {
+          writer.write(log.events.size() + " @ " + log.groupId + "\n");
+        }
+      }
+    } catch (IOException e) {
+      System.err.println("Error writing summary file: " + e.getMessage());
+    }
   }
 }
