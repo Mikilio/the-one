@@ -159,7 +159,7 @@ public class MainZombieApocalypse {
                 "GUI.UnderlayImage.scale = 1.0\n" +
                 "GUI.UnderlayImage.rotate = 0\n" +
                 "GUI.EventLogPanel.nrofEvents = 30\n";
-        Files.write(Path.of("example_settings/" + name + ".txt"), settings.getBytes());
+        Files.write(Path.of("apocalypse_settings/" + name + ".txt"), settings.getBytes());
     }
 //Function to print the Graph including all relevant data and its edges
    private static void printGraph(Graph<RoomNode, RoomEdge> graph) {
