@@ -41,6 +41,7 @@ public class MainZombieApocalypse {
                     "Group4.interface2 = exitInterface\n" +
                     "Group4.nodeLocation = 30, 20\n" +
                     "Group2.speed = 0.5, 1.5\n" +
+
                     "Group4.nrofHosts = 3\n" +
                     "\n");
 
