@@ -11,4 +11,26 @@
     java.enable = true;
     perl.enable = true;
   };
+  tasks = {
+    "app:sim:build" = {
+      exec = "./compile.sh";
+      execIfModified = [
+        "src"
+      ];
+    };
+    "app:sim:prepare:build" = {
+      exec = "javac -sourcepath toolkit -d target -cp lib/jgrapht-core-1.5.2.jar toolkit/apocalypseSettingsGenerator/*.java";
+      execIfModified = [
+        "toolkit/apocalypseSettingsGenerator"
+      ];
+    };
+    "app:sim:prepare" = {
+      exec = "java -Xmx512M -cp target:lib/jgrapht-core-1.5.2.jar apocalypseSettingsGenerator.MainZombieApocalypse";
+      after = ["app:sim:prepare:build"];
+    };
+    "app:sim" = {
+      exec = "./run_apocalypse_simulations.sh 1>&2";
+      after = ["app:sim:prepare" "app:sim:build"];
+    };
+  };
 }

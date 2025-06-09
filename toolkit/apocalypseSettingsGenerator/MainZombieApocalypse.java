@@ -1,57 +1,53 @@
-package core;
+package apocalypseSettingsGenerator;
 
-
-import movement.map.ApocalypseMapNode;
-import movement.map.SimMap;
+import org.jgrapht.Graph;
+import org.jgrapht.traverse.DepthFirstIterator;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 
+//Class to generate settings files from a Graph loaded as CSV file
 public class MainZombieApocalypse {
 
 
-    private static SimMap<ApocalypseMapNode> buildingLayout(){
-        ApocalypseMapNode origin = new ApocalypseMapNode(new Coord(0, 0), 30, 20, 1, 1, 12, 2, 5000);
-        ApocalypseMapNode hallwayOrigin = new ApocalypseMapNode(new Coord(0, 0), 100, 4, 1, 1, 0, 0, 5000);
-        ApocalypseMapNode classSameFinger = new ApocalypseMapNode(new Coord(0, 0), 30, 20, 1, 1, 0, 0, 5000);
-        ApocalypseMapNode balconyEtage1 = new ApocalypseMapNode( new Coord(2, -1), 30, 20, 1, 1, 0, 0, 5000);
-        ApocalypseMapNode hallwayUninfected = new ApocalypseMapNode( new Coord(3, 1), 30, 20, 1, 1, 0, 0, 5000);
-        ApocalypseMapNode bridge = new ApocalypseMapNode(new Coord(3, -1), 30, 20, 1, 1, 0, 0, 5000);
-        ApocalypseMapNode stairs = new ApocalypseMapNode( new Coord(4, 0), 30, 20, 1, 1, 0, 0, 5000);
-        ApocalypseMapNode classEtageNord = new ApocalypseMapNode( new Coord(4, 1), 30, 20, 1, 1, 0, 0, 5000);
-        ApocalypseMapNode magistrale = new ApocalypseMapNode( new Coord(5, -1), 30, 20, 1, 1, 0, 0, 5000);
-        ApocalypseMapNode otherEtages = new ApocalypseMapNode( new Coord(6, 1), 30, 20, 1, 1, 0, 0, 5000);
-
-        //Build connections between nodes
-        origin.addNeighbor(hallwayOrigin);
-        hallwayOrigin.addNeighbor(classSameFinger);
-        hallwayOrigin.addNeighbor(balconyEtage1);
-        classSameFinger.addNeighbor(hallwayUninfected);
-        balconyEtage1.addNeighbor(bridge);
-        hallwayUninfected.addNeighbor(stairs);
-        bridge.addNeighbor(stairs);
-        stairs.addNeighbor(classEtageNord);
-        stairs.addNeighbor(magistrale);
-        classEtageNord.addNeighbor(otherEtages);
-
-    // Create map node list
-        Map<Coord, ApocalypseMapNode> nodesMap = new HashMap<>();
-        for (ApocalypseMapNode node : Arrays.asList(origin, hallwayOrigin, classSameFinger, balconyEtage1, hallwayUninfected, bridge, stairs, classEtageNord, magistrale, otherEtages)) {
-            nodesMap.put(node.getLocation(), node);
-        }
-
-        return new SimMap(nodesMap);
-    }
-    //Function to create a settings file for each scenario listed in the Graph
-    private static void createSettingsFile(String name, double RoomSizeX, double RoomSizeY, int nrOfHumans, int nrOfZombies, int simulationTime, int nrOfEntrances) throws IOException {
+    //Function to create a settings file for a specific node
+    private static void createSettingsFile(String name, double RoomSizeX, double RoomSizeY, int nrOfHumans, int nrOfZombies, int simulationTime, Set<RoomEdge> edges, int numberOfRuns) throws IOException {
         String entrances = "";
-        for (int i = 0; i < nrOfEntrances; i++) {
-            entrances.concat("");
+        String runs = "";
+        for (RoomEdge edge : edges) {
+            // Assuming the edge represents an entrance, you can modify this logic as needed
+           entrances = entrances.concat("################################\n" +
+                    "# Group 4: Entrance for e" + edge.getId() + "e \n" +
+                    "################################\n" +
+                    "#Number should be the edge number in the graph" +
+                    "Group4.groupID = e" + edge.getId() + "e\n" +
+                    "Group4.movementModel = ApocalypseMovement\n" +
+                    "Group4.initialMovement = NoMovement\n" +
+                    "Group4.router = PassiveRouter\n" +
+                    "Group4.nrofInterfaces = 2\n" +
+                    "Group4.interface1 = agentInterface\n" +
+                    "Group4.interface2 = exitInterface\n" +
+                    "Group4.nodeLocation = 30, 20\n" +
+                    "Group2.speed = 0.5, 1.5\n" +
+                    "Group4.nrofHosts = 3\n" +
+                    "\n");
         }
+        
+
+        if(numberOfRuns > 1){
+          runs =  runs.concat("MovementModel.rngSeed = [");
+            for (int i = 1; i < numberOfRuns; i++) {
+                runs = runs.concat(i +";");
+            }
+            runs = runs.concat(numberOfRuns + "]");
+        }else {
+            runs = runs.concat("MovementModel.rngSeed = 1\n");
+        }
+
+
+
 
         String settings = "Scenario.name = classroom_zombie\n" +
                 "Scenario.simulateConnections = true\n" +
@@ -117,27 +113,15 @@ public class MainZombieApocalypse {
                 "Group3.nodeLocation = 0, 0\n" +
                 "Group3.nrofHosts = 1\n" +
                 "\n" +
-                "################################\n" +
-                "# Group 4: Entrance for 1e \n" +
-                "################################\n" +
-                "Group4.groupID = e1e\n" +
-                "Group4.movementModel = ApocalypseMovement\n" +
-                "Group4.initialMovement = NoMovement\n" +
-                "Group4.router = PassiveRouter\n" +
-                "Group4.nrofInterfaces = 2\n" +
-                "Group4.interface1 = agentInterface\n" +
-                "Group4.interface2 = exitInterface\n" +
-                "Group4.nodeLocation = 30, 20\n" +
-                "Group2.speed = 0.5, 1.5\n" +
-                "Group4.nrofHosts = 3\n" +
+                entrances +
                 "\n" +
                 "\n" +
                 "\n" +
                 "##############################\n" +
                 "# Movement model settings\n" +
                 "##############################\n" +
-                "MovementModel.rngSeed = 1\n" +
-                "# classroom size\n" +
+                runs +
+                "\n# classroom size\n" +
                 "MovementModel.worldSize = " + RoomSizeX + " , " + RoomSizeY + "\n" +
                 "# short warmup\n" +
                 "MovementModel.warmup = 10\n" +
@@ -175,21 +159,43 @@ public class MainZombieApocalypse {
                 "GUI.UnderlayImage.scale = 1.0\n" +
                 "GUI.UnderlayImage.rotate = 0\n" +
                 "GUI.EventLogPanel.nrofEvents = 30\n";
-        Files.write(Path.of("example_settings/" + name + ".txt"), settings.getBytes());
+        Files.write(Path.of("apocalypse_settings/" + name + ".txt"), settings.getBytes());
     }
+//Function to print the Graph including all relevant data and its edges
+   private static void printGraph(Graph<RoomNode, RoomEdge> graph) {
+       RoomNode start = graph.vertexSet().iterator().next();
+       DepthFirstIterator<RoomNode, RoomEdge> iterator = new DepthFirstIterator<>(graph, start);
+       while (iterator.hasNext()) {
+           RoomNode node = iterator.next();
+           System.out.println("Processing node: " + node.name +
+                   " (Size: " + node.roomSizeX + "x" + node.roomSizeY +
+                   ", Humans: " + node.nrOfHumans +
+                   ", Zombies: " + node.nrOfZombies +
+                   ", Simulation Time: " + node.simulationTime +
+                   ", Number of Runs: " + node.numberOfRuns + ")");
+           for (RoomEdge edge : graph.edgesOf(node)) {
+               System.out.println("  Connected to edge: " + edge.toString());
+           }
+       }
+   }
+   //Function that uses the generates settings for each node (Room) in the Graph
+   public static void generateSettingsFiles(Graph<RoomNode, RoomEdge> buildingLayout) throws IOException {
+
+       RoomNode start = buildingLayout.vertexSet().iterator().next();
+       DepthFirstIterator<RoomNode, RoomEdge> iterator = new DepthFirstIterator<>(buildingLayout, start);
+       while (iterator.hasNext()) {
+           
+           RoomNode node = iterator.next();
+           createSettingsFile(node.name, node.roomSizeX, node.roomSizeY, node.nrOfHumans, node.nrOfZombies, node.simulationTime, buildingLayout.edgesOf(node), 
+                   node.numberOfRuns);
+
+       }
+   }
 
     public static void main(String[] args) throws IOException {
-        // Initialize settings
-        createSettingsFile("TestRoom", 1000, 20000, 50, 60, 5000, 1);
 
-       SimMap<ApocalypseMapNode> buildingLayout = buildingLayout();
-
-        DTNSim.main( new String[] {"example_settings/TestRoom.txt" });
-        for (ApocalypseMapNode currentNode : buildingLayout.getNodes()){
-            String nodeName = currentNode.toString();
-            createSettingsFile(nodeName, currentNode.getRoomSizeX(), currentNode.getRoomSizeY(), currentNode.getNrOfHumans(), currentNode.getNrOfZombies(), currentNode.getSimulationTime(), currentNode.getNrOfEntrances());
-
-        }
-
+        //Depth Search through the graph and create settings files for each room
+        Graph<RoomNode, RoomEdge> buildingLayout = BuildingGraphImporter.importGraphFromCSV("example_graphs/buildingLayout.csv");
+       generateSettingsFiles(buildingLayout);
     }
 }
