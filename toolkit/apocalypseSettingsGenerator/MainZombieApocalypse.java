@@ -29,7 +29,7 @@ public class MainZombieApocalypse {
 
         String entrances = "";
         String exits = "";
-        String runs = "";
+        String runs = "MovementModel.rngSeed = [" + java.util.concurrent.ThreadLocalRandom.current().nextInt(1, 10001) + "]\n";
         String events = "";
 
 
@@ -84,7 +84,7 @@ public class MainZombieApocalypse {
         }
 
 //Logic to add random seeds for runs if simulation is supposed to be run multiple times
-        if (runIndex > 1) {
+  /*      if (runIndex > 1) {
             runs = runs.concat("MovementModel.rngSeed = [");
             for (int i = 1; i < runIndex; i++) {
                 runs = runs.concat(i + ";");
@@ -93,7 +93,7 @@ public class MainZombieApocalypse {
         } else {
             runs = runs.concat("MovementModel.rngSeed = 1\n");
         }
-
+*/
 
         //Merge above created logic into settings file template
         String settings = "Scenario.name = " + name + "\n" +
