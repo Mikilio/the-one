@@ -3,13 +3,15 @@ package apocalypseSettingsGenerator;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.Graph;
 import java.io.*;
-import java.util.*;
 
+//Function to import nodes from a CSV file into a graph structure
 public class BuildingNodeImporter {
     public static Graph<RoomNode, RoomEdge> importNodesFromCSV(String csvFilePath) throws IOException {
         Graph<RoomNode, RoomEdge> graph = new DefaultDirectedGraph<>(RoomEdge.class);
         try (BufferedReader br = new BufferedReader(new FileReader(csvFilePath))) {
-            String header = br.readLine(); // Header überspringen
+            //Skip header line
+            br.readLine();
+
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(";");
@@ -20,7 +22,7 @@ public class BuildingNodeImporter {
         }
         return graph;
     }
-
+// Function to create a RoomNode from the parts of a CSV line
     private static RoomNode getRoomNode(String[] parts) {
         String source = parts[0].trim();
         int id = Integer.parseInt(parts[1].trim());
@@ -30,7 +32,7 @@ public class BuildingNodeImporter {
         int nrOfZombies = Integer.parseInt(parts[5].trim());
         int simulationTime = Integer.parseInt(parts[6].trim());
         int numberOfRuns = Integer.parseInt(parts[7].trim());
-        RoomNode node = new RoomNode(source, id, roomSizeX, roomSizeY, nrOfHumans, nrOfZombies, simulationTime, numberOfRuns);
-        return node;
+
+        return new RoomNode(source, id, roomSizeX, roomSizeY, nrOfHumans, nrOfZombies, simulationTime, numberOfRuns);
     }
 }

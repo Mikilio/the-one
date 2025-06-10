@@ -11,7 +11,7 @@ import java.util.Map;
 import static apocalypseSettingsGenerator.MainZombieApocalypse.edgeIdCounter;
 
 public class BuildingEdgeImporter {
-
+// Function to import edges from a CSV file into an existing graph structure
     public static Graph<RoomNode, RoomEdge> importEdgesFromCSV(
             Graph<RoomNode, RoomEdge> graph,
             String edgeCsvFilePath
@@ -24,9 +24,11 @@ public class BuildingEdgeImporter {
 
         try (BufferedReader br = new BufferedReader(new FileReader(edgeCsvFilePath))) {
 
-            //Map for header
-            String header = br.readLine();
+            //Skip header line
+            br.readLine();
+
             String line;
+            //Itterate over all lines of CSV, split and parse to required variables
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(";");
                 if (parts.length < 4) continue;
@@ -42,6 +44,7 @@ public class BuildingEdgeImporter {
                 // If no cooresponding id is found, skip this edge
                 if (fromNode == null || toNode == null) continue;
 
+                //build edge with parsed attributes and add it to graph
                 RoomEdge edge = new RoomEdge(
                         edgeIdCounter.getAndIncrement(),
                         fromNode.getId(),
@@ -56,7 +59,7 @@ public class BuildingEdgeImporter {
     }
 
 
-    //Function to parse coordinates from a string with format "x;y"
+    //Function to parse coordinates from a string with format "x#y"
     public static Coord parseCoord(String coordStr) {
         String[] parts = coordStr.split("#");
         if (parts.length != 2) {

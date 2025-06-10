@@ -13,6 +13,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MainZombieApocalypse {
     public static final AtomicInteger edgeIdCounter = new AtomicInteger(0);
 
+
+    //build graph from two CSV files one for nodes and one for edges
     private static Graph<RoomNode, RoomEdge> buildingGraph(String nodeName, String edgeName) throws IOException {
         Graph<RoomNode, RoomEdge> graph = BuildingNodeImporter.importNodesFromCSV("example_graphs/" + nodeName);
         return BuildingEdgeImporter.importEdgesFromCSV(graph, "example_graphs/" + edgeName);
@@ -23,7 +25,7 @@ public class MainZombieApocalypse {
     private static void createSettingsFile(String name, double RoomSizeX, double RoomSizeY, int nrOfHumans, int nrOfZombies, int simulationTime, Set<RoomEdge> incomingEdges, Set<RoomEdge> outgoingEdges, int numberOfRuns) throws IOException {
 
         int groupCounter = 3;
-
+        int eventCounter = 1;
 
         String entrances = "";
         String exits = "";
@@ -56,8 +58,8 @@ public class MainZombieApocalypse {
         if (!incomingEdges.isEmpty()) {
             events = events.concat("#One event per Entrance\n" + "Events.nrof = " + incomingEdges.size() + "\n");
         }
+
         for (RoomEdge edge : incomingEdges) {
-            int eventCounter = 1;
             // Assuming the edge represents an entrance, you can modify this logic as needed
             entrances = entrances.concat("################################\n" +
                     "# Group " + groupCounter + ": Entrance for e" + edge.getId() + "e \n" +
@@ -80,7 +82,7 @@ public class MainZombieApocalypse {
                     "Events" + eventCounter++ + ".filePath = reports/apocalypse/e" + edge.getId() + "e.binee\n");
         }
 
-
+//Logic to add random seeds for runs if simulation is supposed to be run multiple times
         if (numberOfRuns > 1) {
             runs = runs.concat("MovementModel.rngSeed = [");
             for (int i = 1; i < numberOfRuns; i++) {
@@ -92,6 +94,7 @@ public class MainZombieApocalypse {
         }
 
 
+        //Merge above created logic into settings file template
         String settings = "Scenario.name = classroom_zombie\n" +
                 "Scenario.simulateConnections = true\n" +
                 "Scenario.updateInterval = 0.01\n" +
