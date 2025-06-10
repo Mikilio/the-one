@@ -11,13 +11,19 @@ public class RoomEdge extends DefaultEdge {
     private final int toId;
     private final Coord entrance;
     private final Coord exit;
+    private final int exitPriority;
 
-    public RoomEdge(int id, int fromId, int toId, Coord entrance, Coord exit) {
+    public RoomEdge(int id, int fromId, int toId, Coord entrance, Coord exit, int exitPriority) {
         this.id = id;
         this.fromId = fromId;
         this.toId = toId;
         this.entrance = entrance;
         this.exit = exit;
+        this.exitPriority = exitPriority;
+    }
+
+    public int getExitPriority() {
+        return exitPriority;
     }
 
     public int getId() {
