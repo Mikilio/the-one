@@ -11,11 +11,11 @@ import java.util.function.Supplier;
 
 public class BuildingGraphImporter {
     //Counter for unique edge IDs
-    private static final AtomicInteger edgeIdCounter = new AtomicInteger(0);
+
 
 
     //Function to import a graph from a CSV file
-    public static Graph<RoomNode, RoomEdge> importGraphFromCSV(String filePath) {
+   /* public static Graph<RoomNode, RoomEdge> importGraphFromCSV(String filePath) {
         Supplier<RoomEdge> edgeSupplier = () -> new RoomEdge(edgeIdCounter.getAndIncrement());
         Graph<RoomNode, RoomEdge> graph = new SimpleDirectedGraph<>(null, edgeSupplier, false);
 
@@ -68,6 +68,6 @@ public class BuildingGraphImporter {
         }
 
         return graph;
-    }
+    }*/
 
 }

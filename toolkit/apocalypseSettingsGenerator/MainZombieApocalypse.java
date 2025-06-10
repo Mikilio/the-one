@@ -7,10 +7,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 //Class to generate settings files from a Graph loaded as CSV file
 public class MainZombieApocalypse {
+    public static final AtomicInteger edgeIdCounter = new AtomicInteger(0);
 
+    private static Graph<RoomNode, RoomEdge> buildingGraph(String nodeName, String edgeName) throws IOException {
+        Graph<RoomNode, RoomEdge> graph = BuildingNodeImporter.importNodesFromCSV("example_graphs/" + nodeName);
+        return BuildingEdgeImporter.importEdgesFromCSV(graph, "example_graphs/" + edgeName);
+
+    }
 
     //Function to create a settings file for a specific node
     private static void createSettingsFile(String name, double RoomSizeX, double RoomSizeY, int nrOfHumans, int nrOfZombies, int simulationTime, Set<RoomEdge> incomingEdges, Set<RoomEdge> outgoingEdges, int numberOfRuns) throws IOException {
@@ -28,17 +35,17 @@ public class MainZombieApocalypse {
         for (RoomEdge edge : outgoingEdges) {
 
             exits = exits.concat(
-                        "################################\n" +
+                    "################################\n" +
                             "# Group " + groupCounter + ": Exit\n" +
                             "################################\n" +
-                            "# Exit number "+ edge.getId()+"e\n" +
+                            "# Exit number " + edge.getId() + "e\n" +
                             "Group" + groupCounter + ".groupID = " + edge.getId() + "e\n" +
                             "#Always stationary\n" +
                             "Group" + groupCounter + ".movementModel = StationaryMovement\n" +
                             "Group" + groupCounter + ".router = PassiveRouter\n" +
                             "Group" + groupCounter + ".nrofInterfaces = 1\n" +
                             "Group" + groupCounter + ".interface1 = exitInterface\n" +
-                            "Group" + groupCounter + ".nodeLocation = 0, 0\n" +
+                            "Group" + groupCounter + ".nodeLocation = " + (int) edge.getExit().getX() + ", " + (int) edge.getExit().getY() + "\n" +
                             "Group" + groupCounter + ".nrofHosts = 1\n\n"
             );
             groupCounter++;
@@ -63,7 +70,7 @@ public class MainZombieApocalypse {
                     "Group" + groupCounter + ".nrofInterfaces = 2\n" +
                     "Group" + groupCounter + ".interface1 = agentInterface\n" +
                     "Group" + groupCounter + ".interface2 = exitInterface\n" +
-                    "Group" + groupCounter + ".nodeLocation = 30, 20\n" +
+                    "Group" + groupCounter + ".nodeLocation = " + (int) edge.getEntrance().getX() + ", " + (int) edge.getEntrance().getY() + "\n" +
                     "Group2.speed = 0.5, 1.5\n" +
 
                     "Group" + groupCounter + ".nrofHosts = 3\n" +
@@ -192,12 +199,12 @@ public class MainZombieApocalypse {
         DepthFirstIterator<RoomNode, RoomEdge> iterator = new DepthFirstIterator<>(graph, start);
         while (iterator.hasNext()) {
             RoomNode node = iterator.next();
-            System.out.println("Processing node: " + node.name +
-                    " (Size: " + node.roomSizeX + "x" + node.roomSizeY +
-                    ", Humans: " + node.nrOfHumans +
-                    ", Zombies: " + node.nrOfZombies +
-                    ", Simulation Time: " + node.simulationTime +
-                    ", Number of Runs: " + node.numberOfRuns + ")");
+            System.out.println("Processing node: " + node.toString() +
+                    " (Size: " + node.getRoomSizeX() + "x" + node.getRoomSizeY() +
+                    ", Humans: " + node.getNrOfHumans() +
+                    ", Zombies: " + node.getNrOfZombies() +
+                    ", Simulation Time: " + node.getSimulationTime() +
+                    ", Number of Runs: " + node.getNumberOfRuns() + ")");
             for (RoomEdge edge : graph.outgoingEdgesOf(node)) {
                 System.out.println("  Connected to edge: " + edge.toString() + " with ID: " + edge.getId());
             }
@@ -212,8 +219,8 @@ public class MainZombieApocalypse {
         while (iterator.hasNext()) {
 
             RoomNode node = iterator.next();
-            createSettingsFile(node.name, node.roomSizeX, node.roomSizeY, node.nrOfHumans, node.nrOfZombies, node.simulationTime, buildingLayout.incomingEdgesOf(node), buildingLayout.outgoingEdgesOf(node)
-                    , node.numberOfRuns);
+            createSettingsFile(node.toString(), node.getRoomSizeX(), node.getRoomSizeY(), node.getNrOfHumans(), node.getNrOfZombies(), node.getSimulationTime(), buildingLayout.incomingEdgesOf(node), buildingLayout.outgoingEdgesOf(node)
+                    , node.getNumberOfRuns());
 
         }
     }
@@ -221,7 +228,7 @@ public class MainZombieApocalypse {
     public static void main(String[] args) throws IOException {
 
         //Depth Search through the graph and create settings files for each room
-        Graph<RoomNode, RoomEdge> buildingLayout = BuildingGraphImporter.importGraphFromCSV("example_graphs/buildingLayout.csv");
+        Graph<RoomNode, RoomEdge> buildingLayout = buildingGraph("nodeList.csv", "edgeList.csv");
         generateSettingsFiles(buildingLayout);
         //printGraph(buildingLayout);
 
