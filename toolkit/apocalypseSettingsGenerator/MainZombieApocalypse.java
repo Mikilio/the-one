@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 //Class to generate settings files from a Graph loaded as CSV file
 public class MainZombieApocalypse {
     public static final AtomicInteger edgeIdCounter = new AtomicInteger(0);
-
+    public static final AtomicInteger nodeIdCounter = new AtomicInteger(0);
 
     //build graph from two CSV files one for nodes and one for edges
     private static Graph<RoomNode, RoomEdge> buildingGraph(String nodeName, String edgeName) throws IOException {
@@ -22,14 +22,14 @@ public class MainZombieApocalypse {
     }
 
     //Function to create a settings file for a specific node
-    private static void createSettingsFile(String name, double RoomSizeX, double RoomSizeY, int nrOfHumans, int nrOfZombies, int simulationTime, Set<RoomEdge> incomingEdges, Set<RoomEdge> outgoingEdges, int numberOfRuns) throws IOException {
+    private static void createSettingsFile(String name, double RoomSizeX, double RoomSizeY, int nrOfHumans, int nrOfZombies, int simulationTime, Set<RoomEdge> incomingEdges, Set<RoomEdge> outgoingEdges, int runIndex) throws IOException {
 
         int groupCounter = 3;
         int eventCounter = 1;
 
         String entrances = "";
         String exits = "";
-        String runs = "";
+        String runs = "MovementModel.rngSeed = [" + java.util.concurrent.ThreadLocalRandom.current().nextInt(1, 10001) + "]\n";
         String events = "";
 
 
@@ -48,6 +48,7 @@ public class MainZombieApocalypse {
                             "Group" + groupCounter + ".nrofInterfaces = 1\n" +
                             "Group" + groupCounter + ".interface1 = exitInterface\n" +
                             "Group" + groupCounter + ".nodeLocation = " + (int) edge.getExit().getX() + ", " + (int) edge.getExit().getY() + "\n" +
+                            "Group4.priority = " + edge.getExitPriority() + "\n" +
                             "Group" + groupCounter + ".nrofHosts = 1\n\n"
             );
             groupCounter++;
@@ -73,7 +74,7 @@ public class MainZombieApocalypse {
                     "Group" + groupCounter + ".interface1 = agentInterface\n" +
                     "Group" + groupCounter + ".interface2 = exitInterface\n" +
                     "Group" + groupCounter + ".nodeLocation = " + (int) edge.getEntrance().getX() + ", " + (int) edge.getEntrance().getY() + "\n" +
-                    "Group2.speed = 0.5, 1.5\n" +
+                    //  "Group2.speed = 0.5, 1.5\n" +
 
                     "Group" + groupCounter + ".nrofHosts = 3\n" +
                     "\n");
@@ -83,23 +84,22 @@ public class MainZombieApocalypse {
         }
 
 //Logic to add random seeds for runs if simulation is supposed to be run multiple times
-        if (numberOfRuns > 1) {
+  /*      if (runIndex > 1) {
             runs = runs.concat("MovementModel.rngSeed = [");
-            for (int i = 1; i < numberOfRuns; i++) {
+            for (int i = 1; i < runIndex; i++) {
                 runs = runs.concat(i + ";");
             }
-            runs = runs.concat(numberOfRuns + "]");
+            runs = runs.concat(runIndex + "]");
         } else {
             runs = runs.concat("MovementModel.rngSeed = 1\n");
         }
-
+*/
 
         //Merge above created logic into settings file template
-        String settings = "Scenario.name = classroom_zombie\n" +
+        String settings = "Scenario.name = " + name + "\n" +
                 "Scenario.simulateConnections = true\n" +
                 "Scenario.updateInterval = 0.01\n" +
                 "Scenario.endTime = " + simulationTime + "\n" +
-                "# ~1h 23min\n" +
                 "\n" +
                 "# Communication settings\n" +
                 "#Interaction Human - Zombie\n" +
@@ -112,9 +112,10 @@ public class MainZombieApocalypse {
                 "exitInterface.transmitRange = 1\n" +
                 "# close contact only (~1 meter)\n" +
                 "\n" +
-                "Scenario.nrofHostGroups = 4\n" +
+                "Scenario.nrofHostGroups = " + groupCounter + "\n" +
                 "\n" +
                 "Group.apocalypseControlSystemNr = 0\n" +
+                "Group.speed = 0.5, 1.\n" +
                 "\n" +
                 "################################\n" +
                 "# Group 1: Random Humans (Students)\n" +
@@ -129,7 +130,7 @@ public class MainZombieApocalypse {
                 "Group1.interface1 = agentInterface\n" +
                 "Group1.interface2 = exitInterface\n" +
                 " #measured in m/s, perhaps not needed configurated and set later in function (SwitchableMovement)\n" +
-                "Group1.speed = 0.8, 1\n" +
+                //  "Group1.speed = 0.8, 1\n" +
                 "Group1.nrofHosts = " + nrOfHumans + "\n" +
                 "\n" +
                 "\n" +
@@ -143,7 +144,7 @@ public class MainZombieApocalypse {
                 "Group2.nrofInterfaces = 2\n" +
                 "Group2.interface1 = agentInterface\n" +
                 "Group2.interface2 = exitInterface\n" +
-                "Group2.speed = 0.5, 1.5\n" +
+                //     "Group2.speed = 0.5, 1.5\n" +
                 "Group2.nrofHosts = " + nrOfZombies + "\n" +
                 "\n" +
                 exits +
@@ -222,8 +223,7 @@ public class MainZombieApocalypse {
         while (iterator.hasNext()) {
 
             RoomNode node = iterator.next();
-            createSettingsFile(node.toString(), node.getRoomSizeX(), node.getRoomSizeY(), node.getNrOfHumans(), node.getNrOfZombies(), node.getSimulationTime(), buildingLayout.incomingEdgesOf(node), buildingLayout.outgoingEdgesOf(node)
-                    , node.getNumberOfRuns());
+            createSettingsFile(node.toString(), node.getRoomSizeX(), node.getRoomSizeY(), node.getNrOfHumans(), node.getNrOfZombies(), node.getSimulationTime(), buildingLayout.incomingEdgesOf(node), buildingLayout.outgoingEdgesOf(node), node.getNumberOfRuns());
 
         }
     }
@@ -232,8 +232,8 @@ public class MainZombieApocalypse {
 
         //Depth Search through the graph and create settings files for each room
         Graph<RoomNode, RoomEdge> buildingLayout = buildingGraph("nodeList.csv", "edgeList.csv");
-        generateSettingsFiles(buildingLayout);
-        //printGraph(buildingLayout);
+       generateSettingsFiles(buildingLayout);
+      //  printGraph(buildingLayout);
 
     }
 }

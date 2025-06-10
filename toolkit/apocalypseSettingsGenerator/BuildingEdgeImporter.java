@@ -2,25 +2,34 @@ package apocalypseSettingsGenerator;
 
 import core.Coord;
 import org.jgrapht.Graph;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static apocalypseSettingsGenerator.MainZombieApocalypse.edgeIdCounter;
 
 public class BuildingEdgeImporter {
-// Function to import edges from a CSV file into an existing graph structure
-    public static Graph<RoomNode, RoomEdge> importEdgesFromCSV(
-            Graph<RoomNode, RoomEdge> graph,
-            String edgeCsvFilePath
-    ) throws IOException {
-        // Map to access RoomNodes by id to build edges
+    // Function to import edges from a CSV file into an existing graph structure
+    public static Graph<RoomNode, RoomEdge> importEdgesFromCSV(Graph<RoomNode, RoomEdge> graph, String edgeCsvFilePath) throws IOException {
+
+
+   /*     // Map to access RoomNodes by id to build edges
         Map<Integer, RoomNode> nodeMap = new HashMap<>();
         for (RoomNode node : graph.vertexSet()) {
             nodeMap.put(node.getId(), node);
+        }*/
+
+        //Group room by type IDs
+        Map<Integer, List<RoomNode>> roomsByTemplateID = new HashMap<>();
+        for (RoomNode node : graph.vertexSet()) {
+            roomsByTemplateID.computeIfAbsent(node.getTemplateID(), _ -> new ArrayList<>()).add(node);
         }
+
 
         try (BufferedReader br = new BufferedReader(new FileReader(edgeCsvFilePath))) {
 
@@ -33,25 +42,36 @@ public class BuildingEdgeImporter {
                 String[] parts = line.split(";");
                 if (parts.length < 4) continue;
 
-                int fromID = Integer.parseInt(parts[0].trim());
-                int toID = Integer.parseInt(parts[1].trim());
+                int fromTemplateID = Integer.parseInt(parts[0].trim());
+                int toTemplateID = Integer.parseInt(parts[1].trim());
                 String coordEntrance = parts[2].trim();
                 String coordExit = parts[3].trim();
+                int exitPriority = Integer.parseInt(parts[4].trim());
 
-                RoomNode fromNode = nodeMap.get(fromID);
-                RoomNode toNode = nodeMap.get(toID);
+              /*  RoomNode fromNode = nodeMap.get(fromTemplateID);
+                RoomNode toNode = nodeMap.get(toTemplateID);
+*/
+                List<RoomNode> fromNodes = roomsByTemplateID.get(fromTemplateID);
+                List<RoomNode> toNodes = roomsByTemplateID.get(toTemplateID);
 
                 // If no cooresponding id is found, skip this edge
-                if (fromNode == null || toNode == null) continue;
+                if (fromNodes == null || toNodes == null) continue;
 
                 //build edge with parsed attributes and add it to graph
-                RoomEdge edge = new RoomEdge(
-                        edgeIdCounter.getAndIncrement(),
-                        fromNode.getId(),
-                        toNode.getId(),
-                        parseCoord(coordEntrance),
-                        parseCoord(coordExit));
-                graph.addEdge(fromNode, toNode, edge);
+                for (int i = 0; i < toNodes.size(); i++) {
+
+                    RoomNode fromNodeI = fromNodes.get(i % fromNodes.size());
+                    RoomNode toNodeI = toNodes.get(i);
+                    RoomEdge edge = new RoomEdge(
+                            edgeIdCounter.getAndIncrement(),
+                            fromNodeI.getId(),
+                            toNodeI.getId(),
+                            parseCoord(coordEntrance),
+                            parseCoord(coordExit),
+                            exitPriority
+                    );
+                    graph.addEdge(fromNodeI, toNodeI, edge);
+                }
             }
         }
 
