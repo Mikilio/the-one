@@ -7,8 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Movement model for a zombie apocalypse simulation.
- * Entities can be either humans or zombies.
+ * Movement model for a human in a zombie apocalypse simulation.
  *
  * @author Bisma Baubeau
  */
@@ -92,12 +91,9 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 	@Override
 	public Coord getInitialLocation() {
 		assert rng != null : "MovementModel not initialized!";
-		double x = rng.nextDouble() * getMaxX();
-		double y = rng.nextDouble() * getMaxY();
-		Coord c = new Coord(x,y);
-
-		this.lastWaypoint = c;
-		return c;
+		
+		this.lastWaypoint = randomCoord();
+		return lastWaypoint.clone();
 	}
 
 	@Override
@@ -137,9 +133,9 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 			c = randomCoord();
 		}
 
-    if (c == null) {
-      return p;
-    }
+		if (c == null) {
+			return p;
+		}
 
 		// Ensure the new coordinates are within bounds
 		double maxX = getMaxX();
@@ -185,21 +181,39 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 		return true;
 	}
 
+	/**
+	 * Generates a random coordinate within the bounds of the simulation area.
+	 * @return A random coordinate.
+	 */
 	protected Coord randomCoord() {
 		return new Coord(rng.nextDouble() * getMaxX(),
 				rng.nextDouble() * getMaxY());
 	}
 
+	/**
+	 * Probes for nearby zombies and and updates the state accordingly.
+	 * @return true if a zombie was detected, false otherwise.
+	 */
 	private boolean probeForZombies() {
 		zombies = controlSystem.getZombieCoords();
-		Coord closestZombie = getClosestCoordinate(zombies, lastWaypoint);
-		if (closestZombie != null && closestZombie.distance(lastWaypoint) < DETECTION_RADIUS) {
+		Coord closestZombie = getClosestCoordinateInRange(zombies, lastWaypoint, DETECTION_RADIUS);
+		if (closestZombie != null) {
 			state = FLEEING; // Alerted by a zombie, switch to fleeing state
 			return true;
 		}
 		return false;
 	}
 
+	/**
+	 * Calculates a fleeing path based on the current location, exits, humans, and zombies.
+	 * It uses a combination of attraction to exits and repulsion from humans and zombies.
+	 * 
+	 * @param currentLocation The current location of the human.
+	 * @param exits List of possible exits with their priorities.
+	 * @param humans List of coordinates of other humans.
+	 * @param zombies List of coordinates of zombies.
+	 * @return A new coordinate representing the next step in the fleeing path.
+	 */
 	private Coord calculateFleeingPath(Coord currentLocation, List<Tuple<Coord,Integer>> exits, List<Coord> humans, List<Coord> zombies) {
 		double x = currentLocation.getX();
 		double y = currentLocation.getY();
@@ -256,18 +270,19 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 
 	/**
 	 * Help method to find the closest coordinate from a list of coordinates,
-	 * to a specific location
+	 * to a specific location, within a specified range.
 	 * @param allCoords list of coordinates to compare
 	 * @param coord destination node
+	 * @param range maximum distance to consider
 	 * @return closest to the destination
 	 */
-	private static Coord getClosestCoordinate(List<Coord> allCoords,
-			Coord coord) {
+	private static Coord getClosestCoordinateInRange(List<Coord> allCoords,
+			Coord coord, double range) {
 		Coord closestCoord = null;
 		double minDistance = Double.POSITIVE_INFINITY;
 		for (Coord temp : allCoords) {
 			double distance = temp.distance(coord);
-			if (distance < minDistance) {
+			if (distance < Math.min(minDistance, range)) {
 				minDistance = distance;
 				closestCoord = temp;
 			}

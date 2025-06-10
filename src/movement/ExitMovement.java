@@ -8,8 +8,7 @@ import core.Coord;
 import core.Settings;
 
 /**
- * A dummy stationary "movement" model where nodes do not move.
- * Might be useful for simulations with only external connection events.
+ * Stationay movement for an exit node in a zombie apocalypse simulation.
  * 
  * @author Bisma Baubeau
  */

@@ -5,6 +5,8 @@ import core.Settings;
 
 /**
  * A stationary movement model that implements the SwitchableMovement interface.
+ * Made to be used in a zombie apocalypse, it can be created from a human or zombie movement model.
+ * 
  * This model does not change location and is always ready.
  */
 public class NoMovement extends MovementModel implements SwitchableMovement {

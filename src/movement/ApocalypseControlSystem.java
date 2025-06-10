@@ -44,7 +44,7 @@ public class ApocalypseControlSystem {
   }
 
   /**
-   * Returns a reference to a ZombieApocalypseControlSystem with ID provided as parameter. If a
+   * Returns a reference to a ApocalypseControlSystem with ID provided as parameter. If a
    * system does not already exist with the requested ID, a new one is created.
    *
    * @param systemID unique ID of the system

@@ -6,6 +6,9 @@ import core.Settings;
 import interfaces.Activatable;
 import interfaces.AgentInterface;
 
+/**
+ * Movement model for a zombie apocalypse simulation that switches between the different movement models.
+*/
 public class ApocalypseMovement extends ExtendedMovementModel {
 
   private static final String INITIAL_MOVEMENT_SETTING = "initialMovement";
