@@ -39,6 +39,8 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 	private List<Coord> humans;
 	private List<Coord> zombies;
 
+	private Coord chosenExit;
+
 	public HumanMovement(Settings settings) {
 		super(settings);
 
@@ -46,7 +48,8 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 		controlSystem = ApocalypseControlSystem.getApocalypseControlSystem(settings,acs);
 		id = nextID++;
 		controlSystem.registerHuman(this);
-		state = FLEEING; // TODO: change, for testing purposes
+		boolean isWalking = rng.nextDouble() < 0.5;
+		state = isWalking ? WALKING : STATIC;
 
 		this.exits = new LinkedList<>();
 		this.humans = new LinkedList<>();
@@ -60,7 +63,8 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 		controlSystem = hmv.controlSystem;
 		id = nextID++;
 		controlSystem.registerHuman(this);
-		walkingDestination = hmv.walkingDestination != null ? hmv.walkingDestination.clone() : null;
+		boolean isWalking = rng.nextDouble() < 0.5;
+		state = isWalking ? WALKING : STATIC;
 		
 		exits = new LinkedList<>(hmv.exits);
 		humans = new LinkedList<>(hmv.humans);
@@ -204,7 +208,7 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 		Coord e;
 		// Select the exit depending on the priority
 		// p = priority / sum(priorities)
-		if (!exits.isEmpty()) {
+		if (chosenExit == null && !exits.isEmpty()) {
 			List<Coord> drawList = new LinkedList<>();
 			for (Tuple<Coord, Integer> exit : exits) {
 				for (int i = 0; i < exit.getSecond(); i++) {
@@ -212,6 +216,9 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 				}
 			}
 			e = drawList.get(rng.nextInt(drawList.size()));
+			chosenExit = e.clone();
+		} else if (chosenExit != null) {
+			e = chosenExit;
 		} else {
 			e = currentLocation.clone();
 		}
@@ -265,7 +272,7 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 				closestCoord = temp;
 			}
 		}
-		return closestCoord.clone();
+		return closestCoord != null ? closestCoord.clone() : null;
 	}
 
 	/**
