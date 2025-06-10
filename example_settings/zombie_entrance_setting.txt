@@ -9,7 +9,7 @@ Scenario.endTime = 10000
 agentInterface.type = AgentInterface
 agentInterface.transmitSpeed = 250k
 agentInterface.transmitRange = 0.5
-#Interactino Human & Zombie - Exit
+#Interaction Human & Zombie - Exit
 exitInterface.type = ExitInterface
 exitInterface.transmitSpeed = 250k
 exitInterface.transmitRange = 1

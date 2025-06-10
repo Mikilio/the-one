@@ -2,6 +2,7 @@ package movement;
 
 import core.Coord;
 import core.Settings;
+import core.SimClock;
 import core.Tuple;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +20,8 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 	public static final int CHASING = 2;
 
 	public static final double DETECTION_RADIUS = 20; // Radius for detecting other entities
+
+	boolean registered = false; // to register the zombie only once after the warmup phase
 
 	private int id;
 	protected static int nextID = 0;
@@ -40,7 +43,6 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 		int acs = settings.getInt(ApocalypseControlSystem.APOCALYPSE_CONTROL_SYSTEM_NR);
 		controlSystem = ApocalypseControlSystem.getApocalypseControlSystem(settings,acs);
 		id = nextID++;
-		controlSystem.registerZombie(this);
 		nextDestination = randomCoord();
 		
 		humans = new LinkedList<>();
@@ -52,7 +54,6 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 		state = zmv.state;
 		controlSystem = zmv.controlSystem;
 		id = nextID++;
-		controlSystem.registerZombie(this);
 		lastWaypoint = zmv.lastWaypoint != null ? zmv.lastWaypoint.clone() : null;
 		nextDestination = zmv.nextDestination != null ? zmv.nextDestination.clone() : null;
 		
@@ -65,7 +66,6 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 		state = ROAMING;
 		controlSystem = hmv.getControlSystem();
 		id = nextID++;
-		controlSystem.registerZombie(this);
 		nextDestination = null; // No initial roaming destination
 
 		humans = new LinkedList<>(controlSystem.getHumanCoords());
@@ -77,7 +77,6 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 		state = ROAMING;
 		controlSystem = nmv.getControlSystem();
 		id = nextID++;
-		controlSystem.registerZombie(this);
 		nextDestination = null; // No initial roaming destination
 
 		humans = new LinkedList<>(controlSystem.getHumanCoords());
@@ -100,6 +99,11 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 
 	@Override
 	public Path getPath() {
+		if (!registered && SimClock.getTime() > 0) {
+			// Register the zombie with the control system after the warmup phase
+			controlSystem.registerZombie(this);
+			registered = true;
+		}
 		Path p;
 		p = new Path(generateSpeed());
 		p.addWaypoint(lastWaypoint.clone());
