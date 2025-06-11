@@ -33,7 +33,7 @@ public class MainZombieApocalypse {
         String runs = "MovementModel.rngSeed = [" + seedCounter.getAndIncrement() + "]\n";
         String events = "";
 
-
+        int xCounter = 0;
         //Logic to create settings for Exits
         for (RoomEdge edge : outgoingEdges) {
             groupCounter++;
@@ -49,10 +49,11 @@ public class MainZombieApocalypse {
                             "Group" + groupCounter + ".router = PassiveRouter\n" +
                             "Group" + groupCounter + ".nrofInterfaces = 1\n" +
                             "Group" + groupCounter + ".interface1 = exitInterface\n" +
-                            "Group" + groupCounter + ".nodeLocation = " + (int) edge.getExit().getX() + ", " + (int) edge.getExit().getY() + "\n" +
+                            "Group" + groupCounter + ".nodeLocation = " + ((int) edge.getExit().getX() + xCounter) + ", " + (int) edge.getExit().getY() + "\n" +
                             "Group" + groupCounter + ".priority = " + edge.getExitPriority() + "\n" +
                             "Group" + groupCounter + ".nrofHosts = 1\n\n"
             );
+            xCounter = xCounter + 3;
         }
 
 
@@ -196,7 +197,7 @@ public class MainZombieApocalypse {
         //Depth Search through the graph and create settings files for each room
         Graph<RoomNode, RoomEdge> buildingLayout = buildingGraph("nodeList.csv", "edgeList.csv");
         generateSettingsFiles(buildingLayout);
-        //  printGraph(buildingLayout);
+       //   printGraph(buildingLayout);
 
     }
 }

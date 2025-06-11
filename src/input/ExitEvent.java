@@ -13,6 +13,8 @@ import movement.HumanMovement;
 import movement.NoMovement;
 import movement.ZombieMovement;
 
+import static java.lang.Character.getName;
+
 /**
  * A connection up/down event.
  */
@@ -45,6 +47,11 @@ public class ExitEvent extends ExternalEvent {
       if (movement.getCurrentMovementModel() instanceof NoMovement) {
         NoMovement nom = (NoMovement) movement.getCurrentMovementModel();
         movement.setCurrentMovementModel(zombie ? new ZombieMovement(nom) : new HumanMovement(nom));
+		if(zombie){
+		  newActor.setName(newActor.getName() + "z");
+		} else {
+			newActor.setName(newActor.getName() + "h");
+		}
         System.out.println(this);
         return;
       }

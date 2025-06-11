@@ -1,0 +1,167 @@
+Scenario.name = BalconyNordEtage121
+Scenario.endTime = 1500
+
+Scenario.nrofHostGroups = 10
+
+################################
+# Group 1: Random Humans (Students)
+################################
+Group1.groupID = rH
+Group1.movementModel = ApocalypseMovement
+Group1.initialMovement = HumanMovement
+#Can be changed to global for all
+Group1.router = PassiveRouter
+# Custom router to handle infection logic
+Group1.nrofInterfaces = 2
+Group1.interface1 = agentInterface
+Group1.interface2 = exitInterface
+ #measured in m/s, perhaps not needed configurated and set later in function (SwitchableMovement)
+Group1.nrofHosts = 2
+
+
+################################
+# Group 2: Random Zombies
+################################
+Group2.groupID = rZ
+Group2.movementModel = ApocalypseMovement
+Group2.initialMovement = ZombieMovement
+Group2.router = PassiveRouter
+Group2.nrofInterfaces = 2
+Group2.interface1 = agentInterface
+Group2.interface2 = exitInterface
+Group2.nrofHosts = 0
+
+################################
+# Group 3: Exit
+################################
+# Exit number 21e
+Group3.groupID = 21e
+#Always stationary
+Group3.movementModel = ExitMovement
+Group3.router = PassiveRouter
+Group3.nrofInterfaces = 1
+Group3.interface1 = exitInterface
+Group3.nodeLocation = 0, 0
+Group3.priority = 1
+Group3.nrofHosts = 1
+
+################################
+# Group 4: Exit
+################################
+# Exit number 22e
+Group4.groupID = 22e
+#Always stationary
+Group4.movementModel = ExitMovement
+Group4.router = PassiveRouter
+Group4.nrofInterfaces = 1
+Group4.interface1 = exitInterface
+Group4.nodeLocation = 3, 0
+Group4.priority = 1
+Group4.nrofHosts = 1
+
+################################
+# Group 5: Exit
+################################
+# Exit number 23e
+Group5.groupID = 23e
+#Always stationary
+Group5.movementModel = ExitMovement
+Group5.router = PassiveRouter
+Group5.nrofInterfaces = 1
+Group5.interface1 = exitInterface
+Group5.nodeLocation = 6, 0
+Group5.priority = 1
+Group5.nrofHosts = 1
+
+################################
+# Group 6: Exit
+################################
+# Exit number 24e
+Group6.groupID = 24e
+#Always stationary
+Group6.movementModel = ExitMovement
+Group6.router = PassiveRouter
+Group6.nrofInterfaces = 1
+Group6.interface1 = exitInterface
+Group6.nodeLocation = 9, 0
+Group6.priority = 1
+Group6.nrofHosts = 1
+
+################################
+# Group 7: Exit
+################################
+# Exit number 25e
+Group7.groupID = 25e
+#Always stationary
+Group7.movementModel = ExitMovement
+Group7.router = PassiveRouter
+Group7.nrofInterfaces = 1
+Group7.interface1 = exitInterface
+Group7.nodeLocation = 12, 0
+Group7.priority = 1
+Group7.nrofHosts = 1
+
+################################
+# Group 8: Exit
+################################
+# Exit number 26e
+Group8.groupID = 26e
+#Always stationary
+Group8.movementModel = ExitMovement
+Group8.router = PassiveRouter
+Group8.nrofInterfaces = 1
+Group8.interface1 = exitInterface
+Group8.nodeLocation = 18, 0
+Group8.priority = 100
+Group8.nrofHosts = 1
+
+################################
+# Group 9: Exit
+################################
+# Exit number 27e
+Group9.groupID = 27e
+#Always stationary
+Group9.movementModel = ExitMovement
+Group9.router = PassiveRouter
+Group9.nrofInterfaces = 1
+Group9.interface1 = exitInterface
+Group9.nodeLocation = 21, 0
+Group9.priority = 100
+Group9.nrofHosts = 1
+
+
+ 
+################################
+# Group 10: Entrance for e20e 
+################################
+#Number should be the edge number in the graph 
+Group10.groupID = e20e
+Group10.movementModel = ApocalypseMovement
+Group10.initialMovement = NoMovement
+Group10.router = PassiveRouter
+Group10.nrofInterfaces = 2
+Group10.interface1 = agentInterface
+Group10.interface2 = exitInterface
+Group10.nodeLocation = 3, 3
+Group10.nrofHosts = 3
+
+
+
+
+##############################
+# Movement model settings
+##############################
+MovementModel.rngSeed = [2]
+
+# classroom size
+MovementModel.worldSize = 20.0 , 5.0
+# short warmup
+MovementModel.warmup = 200
+
+
+##############################
+# Infection event handling
+##############################
+#One event per Entrance
+Events.nrof = 1
+Events1.filePath = reports/apocalypse/e20e.binee

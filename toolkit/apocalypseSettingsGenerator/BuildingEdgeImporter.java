@@ -17,7 +17,6 @@ public class BuildingEdgeImporter {
     // Function to import edges from a CSV file into an existing graph structure
     public static Graph<RoomNode, RoomEdge> importEdgesFromCSV(Graph<RoomNode, RoomEdge> graph, String edgeCsvFilePath) throws IOException {
 
-
    /*     // Map to access RoomNodes by id to build edges
         Map<Integer, RoomNode> nodeMap = new HashMap<>();
         for (RoomNode node : graph.vertexSet()) {
@@ -58,22 +57,27 @@ public class BuildingEdgeImporter {
                 if (fromNodes == null || toNodes == null) continue;
 
                 //build edge with parsed attributes and add it to graph
-                for (int i = 0; i < toNodes.size(); i++) {
 
-                    RoomNode fromNodeI = fromNodes.get(i % fromNodes.size());
-                    RoomNode toNodeI = toNodes.get(i);
-                    RoomEdge edge = new RoomEdge(
-                            edgeIdCounter.getAndIncrement(),
-                            fromNodeI.getId(),
-                            toNodeI.getId(),
-                            parseCoord(coordEntrance),
-                            parseCoord(coordExit),
-                            exitPriority
-                    );
-                    graph.addEdge(fromNodeI, toNodeI, edge);
+                    for (int i = 0; i < toNodes.size(); i++) {
+
+                        RoomNode fromNodeI = fromNodes.get(i % fromNodes.size());
+                        RoomNode toNodeI = toNodes.get(i);
+                        RoomEdge edge = new RoomEdge(
+                                edgeIdCounter.getAndIncrement(),
+                                fromNodeI.getId(),
+                                toNodeI.getId(),
+                                parseCoord(coordEntrance),
+                                parseCoord(coordExit),
+                                exitPriority
+                        );
+                        graph.addEdge(fromNodeI, toNodeI, edge);
+
+                    }
+
                 }
+
             }
-        }
+
 
         return graph;
     }

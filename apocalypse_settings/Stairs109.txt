@@ -1,0 +1,83 @@
+Scenario.name = Stairs109
+Scenario.endTime = 1500
+
+Scenario.nrofHostGroups = 4
+
+################################
+# Group 1: Random Humans (Students)
+################################
+Group1.groupID = rH
+Group1.movementModel = ApocalypseMovement
+Group1.initialMovement = HumanMovement
+#Can be changed to global for all
+Group1.router = PassiveRouter
+# Custom router to handle infection logic
+Group1.nrofInterfaces = 2
+Group1.interface1 = agentInterface
+Group1.interface2 = exitInterface
+ #measured in m/s, perhaps not needed configurated and set later in function (SwitchableMovement)
+Group1.nrofHosts = 2
+
+
+################################
+# Group 2: Random Zombies
+################################
+Group2.groupID = rZ
+Group2.movementModel = ApocalypseMovement
+Group2.initialMovement = ZombieMovement
+Group2.router = PassiveRouter
+Group2.nrofInterfaces = 2
+Group2.interface1 = agentInterface
+Group2.interface2 = exitInterface
+Group2.nrofHosts = 0
+
+################################
+# Group 3: Exit
+################################
+# Exit number 112e
+Group3.groupID = 112e
+#Always stationary
+Group3.movementModel = ExitMovement
+Group3.router = PassiveRouter
+Group3.nrofInterfaces = 1
+Group3.interface1 = exitInterface
+Group3.nodeLocation = 0, 0
+Group3.priority = 1
+Group3.nrofHosts = 1
+
+
+ 
+################################
+# Group 4: Entrance for e108e 
+################################
+#Number should be the edge number in the graph 
+Group4.groupID = e108e
+Group4.movementModel = ApocalypseMovement
+Group4.initialMovement = NoMovement
+Group4.router = PassiveRouter
+Group4.nrofInterfaces = 2
+Group4.interface1 = agentInterface
+Group4.interface2 = exitInterface
+Group4.nodeLocation = 0, 3
+Group4.nrofHosts = 3
+
+
+
+
+##############################
+# Movement model settings
+##############################
+MovementModel.rngSeed = [8]
+
+# classroom size
+MovementModel.worldSize = 20.0 , 5.0
+# short warmup
+MovementModel.warmup = 200
+
+
+##############################
+# Infection event handling
+##############################
+#One event per Entrance
+Events.nrof = 1
+Events1.filePath = reports/apocalypse/e108e.binee

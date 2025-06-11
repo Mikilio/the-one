@@ -1,0 +1,69 @@
+Scenario.name = classRoomSameFloor97
+Scenario.endTime = 2000
+
+Scenario.nrofHostGroups = 3
+
+################################
+# Group 1: Random Humans (Students)
+################################
+Group1.groupID = rH
+Group1.movementModel = ApocalypseMovement
+Group1.initialMovement = HumanMovement
+#Can be changed to global for all
+Group1.router = PassiveRouter
+# Custom router to handle infection logic
+Group1.nrofInterfaces = 2
+Group1.interface1 = agentInterface
+Group1.interface2 = exitInterface
+ #measured in m/s, perhaps not needed configurated and set later in function (SwitchableMovement)
+Group1.nrofHosts = 15
+
+
+################################
+# Group 2: Random Zombies
+################################
+Group2.groupID = rZ
+Group2.movementModel = ApocalypseMovement
+Group2.initialMovement = ZombieMovement
+Group2.router = PassiveRouter
+Group2.nrofInterfaces = 2
+Group2.interface1 = agentInterface
+Group2.interface2 = exitInterface
+Group2.nrofHosts = 0
+
+
+ 
+################################
+# Group 3: Entrance for e96e 
+################################
+#Number should be the edge number in the graph 
+Group3.groupID = e96e
+Group3.movementModel = ApocalypseMovement
+Group3.initialMovement = NoMovement
+Group3.router = PassiveRouter
+Group3.nrofInterfaces = 2
+Group3.interface1 = agentInterface
+Group3.interface2 = exitInterface
+Group3.nodeLocation = 0, 3
+Group3.nrofHosts = 3
+
+
+
+
+##############################
+# Movement model settings
+##############################
+MovementModel.rngSeed = [31]
+
+# classroom size
+MovementModel.worldSize = 8.0 , 5.0
+# short warmup
+MovementModel.warmup = 200
+
+
+##############################
+# Infection event handling
+##############################
+#One event per Entrance
+Events.nrof = 1
+Events1.filePath = reports/apocalypse/e96e.binee

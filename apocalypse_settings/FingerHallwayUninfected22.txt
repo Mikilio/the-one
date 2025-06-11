@@ -1,0 +1,293 @@
+Scenario.name = FingerHallwayUninfected22
+Scenario.endTime = 5000
+
+Scenario.nrofHostGroups = 19
+
+################################
+# Group 1: Random Humans (Students)
+################################
+Group1.groupID = rH
+Group1.movementModel = ApocalypseMovement
+Group1.initialMovement = HumanMovement
+#Can be changed to global for all
+Group1.router = PassiveRouter
+# Custom router to handle infection logic
+Group1.nrofInterfaces = 2
+Group1.interface1 = agentInterface
+Group1.interface2 = exitInterface
+ #measured in m/s, perhaps not needed configurated and set later in function (SwitchableMovement)
+Group1.nrofHosts = 2
+
+
+################################
+# Group 2: Random Zombies
+################################
+Group2.groupID = rZ
+Group2.movementModel = ApocalypseMovement
+Group2.initialMovement = ZombieMovement
+Group2.router = PassiveRouter
+Group2.nrofInterfaces = 2
+Group2.interface1 = agentInterface
+Group2.interface2 = exitInterface
+Group2.nrofHosts = 0
+
+################################
+# Group 3: Exit
+################################
+# Exit number 28e
+Group3.groupID = 28e
+#Always stationary
+Group3.movementModel = ExitMovement
+Group3.router = PassiveRouter
+Group3.nrofInterfaces = 1
+Group3.interface1 = exitInterface
+Group3.nodeLocation = 0, 0
+Group3.priority = 100
+Group3.nrofHosts = 1
+
+################################
+# Group 4: Exit
+################################
+# Exit number 33e
+Group4.groupID = 33e
+#Always stationary
+Group4.movementModel = ExitMovement
+Group4.router = PassiveRouter
+Group4.nrofInterfaces = 1
+Group4.interface1 = exitInterface
+Group4.nodeLocation = 3, 0
+Group4.priority = 100
+Group4.nrofHosts = 1
+
+################################
+# Group 5: Exit
+################################
+# Exit number 38e
+Group5.groupID = 38e
+#Always stationary
+Group5.movementModel = ExitMovement
+Group5.router = PassiveRouter
+Group5.nrofInterfaces = 1
+Group5.interface1 = exitInterface
+Group5.nodeLocation = 6, 0
+Group5.priority = 100
+Group5.nrofHosts = 1
+
+################################
+# Group 6: Exit
+################################
+# Exit number 43e
+Group6.groupID = 43e
+#Always stationary
+Group6.movementModel = ExitMovement
+Group6.router = PassiveRouter
+Group6.nrofInterfaces = 1
+Group6.interface1 = exitInterface
+Group6.nodeLocation = 9, 0
+Group6.priority = 100
+Group6.nrofHosts = 1
+
+################################
+# Group 7: Exit
+################################
+# Exit number 48e
+Group7.groupID = 48e
+#Always stationary
+Group7.movementModel = ExitMovement
+Group7.router = PassiveRouter
+Group7.nrofInterfaces = 1
+Group7.interface1 = exitInterface
+Group7.nodeLocation = 12, 0
+Group7.priority = 100
+Group7.nrofHosts = 1
+
+################################
+# Group 8: Exit
+################################
+# Exit number 53e
+Group8.groupID = 53e
+#Always stationary
+Group8.movementModel = ExitMovement
+Group8.router = PassiveRouter
+Group8.nrofInterfaces = 1
+Group8.interface1 = exitInterface
+Group8.nodeLocation = 15, 0
+Group8.priority = 100
+Group8.nrofHosts = 1
+
+################################
+# Group 9: Exit
+################################
+# Exit number 58e
+Group9.groupID = 58e
+#Always stationary
+Group9.movementModel = ExitMovement
+Group9.router = PassiveRouter
+Group9.nrofInterfaces = 1
+Group9.interface1 = exitInterface
+Group9.nodeLocation = 18, 0
+Group9.priority = 100
+Group9.nrofHosts = 1
+
+################################
+# Group 10: Exit
+################################
+# Exit number 63e
+Group10.groupID = 63e
+#Always stationary
+Group10.movementModel = ExitMovement
+Group10.router = PassiveRouter
+Group10.nrofInterfaces = 1
+Group10.interface1 = exitInterface
+Group10.nodeLocation = 21, 0
+Group10.priority = 100
+Group10.nrofHosts = 1
+
+################################
+# Group 11: Exit
+################################
+# Exit number 68e
+Group11.groupID = 68e
+#Always stationary
+Group11.movementModel = ExitMovement
+Group11.router = PassiveRouter
+Group11.nrofInterfaces = 1
+Group11.interface1 = exitInterface
+Group11.nodeLocation = 24, 0
+Group11.priority = 100
+Group11.nrofHosts = 1
+
+################################
+# Group 12: Exit
+################################
+# Exit number 73e
+Group12.groupID = 73e
+#Always stationary
+Group12.movementModel = ExitMovement
+Group12.router = PassiveRouter
+Group12.nrofInterfaces = 1
+Group12.interface1 = exitInterface
+Group12.nodeLocation = 27, 0
+Group12.priority = 100
+Group12.nrofHosts = 1
+
+################################
+# Group 13: Exit
+################################
+# Exit number 78e
+Group13.groupID = 78e
+#Always stationary
+Group13.movementModel = ExitMovement
+Group13.router = PassiveRouter
+Group13.nrofInterfaces = 1
+Group13.interface1 = exitInterface
+Group13.nodeLocation = 30, 0
+Group13.priority = 100
+Group13.nrofHosts = 1
+
+################################
+# Group 14: Exit
+################################
+# Exit number 83e
+Group14.groupID = 83e
+#Always stationary
+Group14.movementModel = ExitMovement
+Group14.router = PassiveRouter
+Group14.nrofInterfaces = 1
+Group14.interface1 = exitInterface
+Group14.nodeLocation = 33, 0
+Group14.priority = 100
+Group14.nrofHosts = 1
+
+################################
+# Group 15: Exit
+################################
+# Exit number 88e
+Group15.groupID = 88e
+#Always stationary
+Group15.movementModel = ExitMovement
+Group15.router = PassiveRouter
+Group15.nrofInterfaces = 1
+Group15.interface1 = exitInterface
+Group15.nodeLocation = 36, 0
+Group15.priority = 100
+Group15.nrofHosts = 1
+
+################################
+# Group 16: Exit
+################################
+# Exit number 93e
+Group16.groupID = 93e
+#Always stationary
+Group16.movementModel = ExitMovement
+Group16.router = PassiveRouter
+Group16.nrofInterfaces = 1
+Group16.interface1 = exitInterface
+Group16.nodeLocation = 39, 0
+Group16.priority = 100
+Group16.nrofHosts = 1
+
+################################
+# Group 17: Exit
+################################
+# Exit number 98e
+Group17.groupID = 98e
+#Always stationary
+Group17.movementModel = ExitMovement
+Group17.router = PassiveRouter
+Group17.nrofInterfaces = 1
+Group17.interface1 = exitInterface
+Group17.nodeLocation = 42, 0
+Group17.priority = 100
+Group17.nrofHosts = 1
+
+################################
+# Group 18: Exit
+################################
+# Exit number 103e
+Group18.groupID = 103e
+#Always stationary
+Group18.movementModel = ExitMovement
+Group18.router = PassiveRouter
+Group18.nrofInterfaces = 1
+Group18.interface1 = exitInterface
+Group18.nodeLocation = 45, 0
+Group18.priority = 100
+Group18.nrofHosts = 1
+
+
+ 
+################################
+# Group 19: Entrance for e21e 
+################################
+#Number should be the edge number in the graph 
+Group19.groupID = e21e
+Group19.movementModel = ApocalypseMovement
+Group19.initialMovement = NoMovement
+Group19.router = PassiveRouter
+Group19.nrofInterfaces = 2
+Group19.interface1 = agentInterface
+Group19.interface2 = exitInterface
+Group19.nodeLocation = 3, 3
+Group19.nrofHosts = 3
+
+
+
+
+##############################
+# Movement model settings
+##############################
+MovementModel.rngSeed = [79]
+
+# classroom size
+MovementModel.worldSize = 65.0 , 10.0
+# short warmup
+MovementModel.warmup = 200
+
+
+##############################
+# Infection event handling
+##############################
+#One event per Entrance
+Events.nrof = 1
+Events1.filePath = reports/apocalypse/e21e.binee
