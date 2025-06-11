@@ -2,36 +2,54 @@
 
 echo "Starting simulations"
 
-echo "Running originClassRoom.txt (1 run)"
-java -Xmx512M -cp target:lib/ECLA.jar:lib/DTNConsoleConnection.jar core.DTNSim "$@" -b 1 apocalypse_settings/originClassRoom.txt
-sleep 2
+echo "Running originClassRoom0.txt (1 run)"
+java -Xmx512M -cp "target:lib/ECLA.jar:lib/DTNConsoleConnection.jar" core.DTNSim "$@" -b 1 apocalypse_settings/originClassRoom0.txt &
+wait
 
-echo "Running FingerHallwayInfectionOrigin.txt (1 run)"
-java -Xmx512M -cp target:lib/ECLA.jar:lib/DTNConsoleConnection.jar core.DTNSim "$@" -b 1 apocalypse_settings/FingerHallwayInfectionOrigin.txt
-sleep 2
+echo "Running FingerHallwayInfectionOrigin1.txt (1 run)"
+java -Xmx512M -cp "target:lib/ECLA.jar:lib/DTNConsoleConnection.jar" core.DTNSim "$@" -b 1 apocalypse_settings/FingerHallwayInfectionOrigin1.txt &
+wait
 
-echo "Running ClassRoomSameFinger.txt (19 runs)"
-java -Xmx512M -cp target:lib/ECLA.jar:lib/DTNConsoleConnection.jar core.DTNSim "$@" -b 19 apocalypse_settings/ClassRoomSameFinger.txt
+echo "Running ClassRoomSameFingerXX.txt (19 runs)"
+i=2
+while [ "$i" -le 20 ]; do
+  java -Xmx512M -cp "target:lib/ECLA.jar:lib/DTNConsoleConnection.jar" core.DTNSim "$@" -b 1 apocalypse_settings/ClassRoomSameFinger${i}.txt &
+  i=`expr "$i" + 1`
+done
 
-echo "Running BalconyNordEtage1.txt (1 run)"
-java -Xmx512M -cp target:lib/ECLA.jar:lib/DTNConsoleConnection.jar core.DTNSim "$@" -b 1 apocalypse_settings/BalconyNordEtage1.txt
-sleep 2
+echo "Running BalconyNordEtage121.txt (1 run)"
+java -Xmx512M -cp "target:lib/ECLA.jar:lib/DTNConsoleConnection.jar" core.DTNSim "$@" -b 1 apocalypse_settings/BalconyNordEtage121.txt &
+wait
 
-echo "Running Bridge.txt (2 runs)"
-java -Xmx512M -cp target:lib/ECLA.jar:lib/DTNConsoleConnection.jar core.DTNSim "$@" -b 2 apocalypse_settings/Bridge.txt
+echo "Running FingerHallwayUninfectedXX.txt (5 runs)"
+i=22
+while [ "$i" -le 26 ]; do
+  java -Xmx512M -cp "target:lib/ECLA.jar:lib/DTNConsoleConnection.jar" core.DTNSim "$@" -b 1 apocalypse_settings/FingerHallwayUninfected${i}.txt &
+  i=`expr "$i" + 1`
+done
 
-echo "Running FingerHallwayUninfected.txt (5 runs)"
-java -Xmx512M -cp target:lib/ECLA.jar:lib/DTNConsoleConnection.jar core.DTNSim "$@" -b 5 apocalypse_settings/FingerHallwayUninfected.txt
-sleep 2
+echo "Running BridgeXX.txt (2 runs)"
+i=27
+while [ "$i" -le 28 ]; do
+  java -Xmx512M -cp "target:lib/ECLA.jar:lib/DTNConsoleConnection.jar" core.DTNSim "$@" -b 1 apocalypse_settings/Bridge${i}.txt &
+  i=`expr "$i" + 1`
+done
+wait
 
-echo "Running classRoomSameFloor.txt (1 run)"
-java -Xmx512M -cp target:lib/ECLA.jar:lib/DTNConsoleConnection.jar core.DTNSim "$@" -b 1 apocalypse_settings/classRoomSameFloor.txt
+echo "Running classRoomSameFloorXX.txt (80 runs)"
+i=29
+while [ "$i" -le 108 ]; do
+  java -Xmx512M -cp "target:lib/ECLA.jar:lib/DTNConsoleConnection.jar" core.DTNSim "$@" -b 1 apocalypse_settings/classRoomSameFloor${i}.txt &
+  i=`expr "$i" + 1`
+done
 
-echo "Running Stairs.txt (4 runs)"
-java -Xmx512M -cp target:lib/ECLA.jar:lib/DTNConsoleConnection.jar core.DTNSim "$@" -b 4 apocalypse_settings/Stairs.txt
-sleep 2
+echo "Running StairsXX.txt (4 runs)"
+i=109
+while [ "$i" -le 112 ]; do
+  java -Xmx512M -cp "target:lib/ECLA.jar:lib/DTNConsoleConnection.jar" core.DTNSim "$@" -b 1 apocalypse_settings/Stairs${i}.txt &
+  i=`expr "$i" + 1`
+done
+wait
 
-echo "Running Magistrale.txt (1 run)"
-java -Xmx512M -cp target:lib/ECLA.jar:lib/DTNConsoleConnection.jar core.DTNSim "$@" -b 1 apocalypse_settings/Magistrale.txt
-
-echo "All simulations complete."
+echo "Running Magistrale114.txt (1 run)"
+./one.sh apocalypse_settings/Magistrale114.txt

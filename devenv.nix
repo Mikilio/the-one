@@ -18,19 +18,25 @@
         "src"
       ];
     };
-    "app:sim:prepare:build" = {
-      exec = "javac -sourcepath toolkit -d target -cp lib/jgrapht-core-1.5.2.jar toolkit/apocalypseSettingsGenerator/*.java";
-      execIfModified = [
-        "toolkit/apocalypseSettingsGenerator"
-      ];
-    };
-    "app:sim:prepare" = {
-      exec = "java -Xmx512M -cp target:lib/jgrapht-core-1.5.2.jar apocalypseSettingsGenerator.MainZombieApocalypse";
-      after = ["app:sim:prepare:build"];
-    };
+    # "app:sim:prepare:build" = {
+    #   exec = "javac -sourcepath toolkit -d target -cp lib/jgrapht-core-1.5.2.jar toolkit/apocalypseSettingsGenerator/*.java src/core/Coord.java";
+    #   execIfModified = [
+    #     "toolkit/apocalypseSettingsGenerator"
+    #   ];
+    # };
+    # "app:sim:prepare" = {
+    #   exec = "java -Xmx512M -cp target:lib/jgrapht-core-1.5.2.jar apocalypseSettingsGenerator.MainZombieApocalypse";
+    #   after = ["app:sim:prepare:build"];
+    # };
     "app:sim" = {
-      exec = "./run_apocalypse_simulations.sh 1>&2";
-      after = ["app:sim:prepare" "app:sim:build"];
+      exec = ''
+        chmod +x ./run_apocalypse_simulations.sh
+        echo "You can now run the simulations with ./run_apocalypse_simulations.sh";
+      '';
+      after = [
+        # "app:sim:prepare"
+        "app:sim:build"
+      ];
     };
   };
 }
