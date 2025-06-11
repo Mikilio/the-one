@@ -2,13 +2,13 @@ package movement;
 
 import core.Coord;
 import core.Settings;
-
+import core.SimClock;
+import core.Tuple;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Movement model for a zombie apocalypse simulation.
- * Entities can be either humans or zombies.
+ * Movement model for a zombie in a zombie apocalypse simulation.
  *
  * @author Bisma Baubeau
  */
@@ -18,19 +18,22 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 	public static final int ROAMING = 1;
 	public static final int CHASING = 2;
 
-	public static final double DETECTION_RADIUS = 1000; // Radius for detecting other entities
+	public static final double DETECTION_RADIUS = 20; // Radius for detecting other entities
+
+	boolean registered = false; // to register the zombie only once after the warmup phase
 
 	private int id;
-	private static int nextID = 0;
+	protected static int nextID = 0;
 	private ApocalypseControlSystem controlSystem;
 
 	private int state;
 
 	private Coord lastWaypoint;
 	private Coord nextDestination;
-	private final double distance = 10; // distance to move before recalculating path
+	private final double distance = 1; // distance to move before recalculating path
 
 	private List<Coord> humans;
+	private List<Tuple<Coord, Integer>> exits;
 
 	public ZombieMovement(Settings settings) {
 		super(settings);
@@ -39,7 +42,6 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 		int acs = settings.getInt(ApocalypseControlSystem.APOCALYPSE_CONTROL_SYSTEM_NR);
 		controlSystem = ApocalypseControlSystem.getApocalypseControlSystem(settings,acs);
 		id = nextID++;
-		controlSystem.registerZombie(this);
 		nextDestination = randomCoord();
 		
 		humans = new LinkedList<>();
@@ -51,7 +53,6 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 		state = zmv.state;
 		controlSystem = zmv.controlSystem;
 		id = nextID++;
-		controlSystem.registerZombie(this);
 		lastWaypoint = zmv.lastWaypoint != null ? zmv.lastWaypoint.clone() : null;
 		nextDestination = zmv.nextDestination != null ? zmv.nextDestination.clone() : null;
 		
@@ -64,24 +65,20 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 		state = ROAMING;
 		controlSystem = hmv.getControlSystem();
 		id = nextID++;
-		controlSystem.registerZombie(this);
-		nextDestination = null; // No initial roaming destination
 
 		humans = new LinkedList<>(controlSystem.getHumanCoords());
 	}
 
-  public ZombieMovement(NoMovement nmv) {
+  	public ZombieMovement(NoMovement nmv) {
 		super(nmv);
 
 		state = ROAMING;
 		controlSystem = nmv.getControlSystem();
 		id = nextID++;
-		controlSystem.registerZombie(this);
 		nextDestination = null; // No initial roaming destination
 
 		humans = new LinkedList<>(controlSystem.getHumanCoords());
-
-  }
+}
 
 	/**
 	 * Returns a possible (random) placement for a host
@@ -90,16 +87,19 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 	@Override
 	public Coord getInitialLocation() {
 		assert rng != null : "MovementModel not initialized!";
-		double x = rng.nextDouble() * getMaxX();
-		double y = rng.nextDouble() * getMaxY();
-		Coord c = new Coord(x,y);
-
-		this.lastWaypoint = c;
-		return c;
+		
+		this.lastWaypoint = randomCoord();
+		return lastWaypoint.clone();
 	}
 
 	@Override
 	public Path getPath() {
+		// Register the zombie with the control system after the warmup phase
+		if (!registered && SimClock.getTime() > 0) {
+			controlSystem.registerZombie(this);
+			registered = true;
+		}
+
 		Path p;
 		p = new Path(generateSpeed());
 		p.addWaypoint(lastWaypoint.clone());
@@ -109,7 +109,18 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 		probeForHumans();
 		// If in ROAMING state, set a new random destination if needed
 		if (state == ROAMING && (nextDestination == null || nextDestination.distance(lastWaypoint) < distance)) {
-			nextDestination = randomCoord();
+			// Prioritize exits if in range
+			exits = controlSystem.getExits();
+			LinkedList<Coord> exitsCoords = new LinkedList<>();
+			for (Tuple<Coord, Integer> exit : exits) {
+				exitsCoords.add(exit.getFirst());
+			}
+			Coord closestExit = getClosestCoordinateInRange(exitsCoords, lastWaypoint, DETECTION_RADIUS);
+			if (closestExit != null) {
+				nextDestination = closestExit.clone();
+			} else {
+				nextDestination = randomCoord();
+			}
 		}
 		
 		if (state == STATIC) {
@@ -170,12 +181,17 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 		return true;
 	}
 
+	/**
+	 * Probes for humans within the detection radius and updates the state accordingly.
+	 * 
+	 * @return true if a human was detected, false otherwise.
+	 */
 	private boolean probeForHumans() {
 		// Check if there are humans within the detection radius
 		humans = controlSystem.getHumanCoords();
-		Coord closestHuman = getClosestCoordinate(humans, lastWaypoint);
+		Coord closestHuman = getClosestCoordinateInRange(humans, lastWaypoint, DETECTION_RADIUS);
 
-		if (closestHuman != null && closestHuman.distance(lastWaypoint) <= DETECTION_RADIUS) {
+		if (closestHuman != null) {
 			nextDestination = closestHuman.clone();
 			state = CHASING; // Change state to chasing
 			return true;
@@ -185,6 +201,10 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 		}
 	}
 
+	/**
+	 * Generates a random coordinate within the bounds of the simulation area.
+	 * @return a random coordinate
+	 */
 	protected Coord randomCoord() {
 		return new Coord(rng.nextDouble() * getMaxX(),
 				rng.nextDouble() * getMaxY());
@@ -192,18 +212,19 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 
 	/**
 	 * Help method to find the closest coordinate from a list of coordinates,
-	 * to a specific location
+	 * to a specific location, within a specified range.
 	 * @param allCoords list of coordinates to compare
 	 * @param coord destination node
+	 * @param range maximum distance to consider
 	 * @return closest to the destination
 	 */
-	private static Coord getClosestCoordinate(List<Coord> allCoords,
-			Coord coord) {
+	private static Coord getClosestCoordinateInRange(List<Coord> allCoords,
+			Coord coord, double range) {
 		Coord closestCoord = null;
 		double minDistance = Double.POSITIVE_INFINITY;
 		for (Coord temp : allCoords) {
 			double distance = temp.distance(coord);
-			if (distance < minDistance) {
+			if (distance < Math.min(minDistance, range)) {
 				minDistance = distance;
 				closestCoord = temp;
 			}

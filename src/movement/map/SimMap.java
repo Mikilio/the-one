@@ -14,13 +14,13 @@ import core.Coord;
 /**
  * A simulation map for node movement.
  */
-public class SimMap implements Serializable {
+public class SimMap <T extends MapNode> implements Serializable {
 	private Coord minBound;
 	private Coord maxBound;
 	/** list representation of the map for efficient list-returning */
-	private ArrayList<MapNode> nodes;
+	private ArrayList<T> nodes;
 	/** hash map presentation of the map for efficient finding node by coord */
-	private Map<Coord, MapNode> nodesMap;
+	private Map<Coord, T> nodesMap;
 	/** offset of map translations */
 	private Coord offset;
 	/** is this map data mirrored after reading */
@@ -29,9 +29,9 @@ public class SimMap implements Serializable {
 	/** is re-hash needed before using hash mode (some coordinates changed) */
 	private boolean needsRehash = false;
 
-	public SimMap(Map<Coord, MapNode> nodes) {
+	public SimMap(Map<Coord, T> nodes) {
 		this.offset = new Coord(0,0);
-		this.nodes = new ArrayList<MapNode>(nodes.values());
+		this.nodes = new ArrayList<T>(nodes.values());
 		this.nodesMap = nodes;
 		this.isMirrored = false;
 		setBounds();
@@ -41,7 +41,7 @@ public class SimMap implements Serializable {
 	 * Returns all the map nodes in a list
 	 * @return all the map nodes in a list
 	 */
-	public List<MapNode> getNodes() {
+	public List<T> getNodes() {
 		return this.nodes;
 	}
 
@@ -51,10 +51,10 @@ public class SimMap implements Serializable {
 	 * @param c The coordinate
 	 * @return The map node in that location or null if it doesn't exist
 	 */
-	public MapNode getNodeByCoord(Coord c) {
+	public T getNodeByCoord(Coord c) {
 		if (needsRehash) { // some coordinates have changed after creating hash
 			nodesMap.clear();
-			for (MapNode node : getNodes()) {
+			for (T node : getNodes()) {
 				nodesMap.put(node.getLocation(), node); // re-hash
 			}
 		}
@@ -102,7 +102,7 @@ public class SimMap implements Serializable {
 	 * @param dy the amount to translate Y coordinates
 	 */
 	public void translate(double dx, double dy) {
-		for (MapNode n : nodes) {
+		for (T n : nodes) {
 			n.getLocation().translate(dx, dy);
 		}
 
@@ -120,7 +120,7 @@ public class SimMap implements Serializable {
 		assert !isMirrored : "Map data already mirrored";
 
 		Coord c;
-		for (MapNode n : nodes) {
+		for (T n : nodes) {
 			c=n.getLocation();
 			c.setLocation(c.getX(), -c.getY());
 		}
@@ -138,7 +138,7 @@ public class SimMap implements Serializable {
 		minX = minY = Double.MAX_VALUE;
 		maxX = maxY = -Double.MAX_VALUE;
 
-		for (MapNode n : nodes) {
+		for (T n : nodes) {
 			c = n.getLocation();
 			if (c.getX() < minX) {
 				minX = c.getX();

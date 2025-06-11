@@ -217,7 +217,7 @@ public class ConnectivityGrid extends ConnectivityOptimizer {
 
 		assert row > 0 && row <= rows && col > 0 && col <= cols : "Location " +
 		c + " is out of world's bounds";
-
+		//Print current Coordinate for Bug hunting
 		return this.cells[row][col];
 	}
 

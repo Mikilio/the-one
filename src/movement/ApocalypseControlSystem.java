@@ -3,6 +3,7 @@ package movement;
 import core.Coord;
 import core.DTNSim;
 import core.Settings;
+import core.Tuple;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,13 +16,12 @@ import java.util.List;
 public class ApocalypseControlSystem {
 
   public static final String APOCALYPSE_CONTROL_SYSTEM_NR = "apocalypseControlSystemNr";
-  public static final String EXITS_LOCATIONS_SETTING = "exitsLocations";
 
   private static HashMap<Integer, ApocalypseControlSystem> systems;
 
   private HashMap<Integer, HumanMovement> humans;
   private HashMap<Integer, ZombieMovement> zombies;
-  private List<Coord> exits;
+  private List<Tuple<Coord, Integer>> exits;
 
   static {
     DTNSim.registerForReset(BusControlSystem.class.getCanonicalName());
@@ -29,7 +29,7 @@ public class ApocalypseControlSystem {
   }
 
   /**
-   * Creates a new instance of ontrolSystem without any entities.
+   * Creates a new instance of ApocalypseControlSystem without any entities.
    *
    * @param systemID The unique ID of this system.
    */
@@ -37,15 +37,6 @@ public class ApocalypseControlSystem {
     exits = new LinkedList<>();
     humans = new HashMap<>();
     zombies = new HashMap<>();
-
-    if (s != null) {
-      int[] exitCoords = s.getCsvInts(EXITS_LOCATIONS_SETTING);
-      for (int i = 0; i < exitCoords.length; i += 2) {
-        if (i + 1 < exitCoords.length) {
-          exits.add(new Coord(exitCoords[i], exitCoords[i + 1]));
-        }
-      }
-    }
   }
 
   public static void reset() {
@@ -53,7 +44,7 @@ public class ApocalypseControlSystem {
   }
 
   /**
-   * Returns a reference to a ZombieApocalypseControlSystem with ID provided as parameter. If a
+   * Returns a reference to a ApocalypseControlSystem with ID provided as parameter. If a
    * system does not already exist with the requested ID, a new one is created.
    *
    * @param systemID unique ID of the system
@@ -87,15 +78,18 @@ public class ApocalypseControlSystem {
     zombies.remove(zombieID);
   }
 
+  public void registerExit(Coord c, int priority) {
+    Tuple<Coord, Integer> exit = new Tuple<>(c, priority);
+    if (!exits.contains(exit)) {
+      exits.add(exit);
+    }
+  }
+
   /**
    * @return A list of all exits belonging to this system
    */
-  public List<Coord> getExits() {
+  public List<Tuple<Coord, Integer>> getExits() {
     return exits;
-  }
-
-  public void setExits(List<Coord> exits) {
-    this.exits = exits;
   }
 
   public List<Coord> getHumanCoords() {

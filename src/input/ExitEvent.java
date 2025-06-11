@@ -4,10 +4,10 @@
  */
 package input;
 
-import core.DTNHost;
-import core.NetworkInterface;
-import core.World;
 import java.util.Iterator;
+
+import core.DTNHost;
+import core.World;
 import movement.ApocalypseMovement;
 import movement.HumanMovement;
 import movement.NoMovement;
@@ -40,11 +40,12 @@ public class ExitEvent extends ExternalEvent {
     DTNHost newActor;
     while (hosts.hasNext()) {
       newActor = hosts.next();
-      if (newActor.groupId != groupId) {continue;}
+      if (!newActor.groupId.contentEquals(groupId)) {continue;}
       ApocalypseMovement movement = (ApocalypseMovement)newActor.getMovement();
       if (movement.getCurrentMovementModel() instanceof NoMovement) {
         NoMovement nom = (NoMovement) movement.getCurrentMovementModel();
         movement.setCurrentMovementModel(zombie ? new ZombieMovement(nom) : new HumanMovement(nom));
+        System.out.println(this);
         return;
       }
     }
@@ -52,6 +53,6 @@ public class ExitEvent extends ExternalEvent {
 
 	@Override
 	public String toString() {
-    return "EX: " + (zombie ? "Zombie" : "Human") + " @" + this.time + " ->"+this.groupId;
+    return "Entry: " + (zombie ? "Zombie" : "Human") + " @" + this.time + " ->"+this.groupId;
 	}
 }

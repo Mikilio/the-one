@@ -10,7 +10,6 @@ import core.Settings;
 import core.SimClock;
 import java.util.Collection;
 import movement.ApocalypseMovement;
-import movement.StationaryMovement;
 
 /**
  * A Network Interface that connects to LeverInterfaces one at a time. A host with this interface
@@ -20,10 +19,14 @@ public class ExitInterface extends SimpleBroadcastInterface implements Activatab
 
   public boolean active;
 
+  private double lastConnectionTime = 0;
+
+  private final double EXIT_INTERVAL = 1.0;
+
   /** Reads the interface settings from the Settings file */
   public ExitInterface(Settings s) {
     super(s);
-    active = false;
+    active = true;
   }
 
   /**
@@ -33,11 +36,8 @@ public class ExitInterface extends SimpleBroadcastInterface implements Activatab
    */
   public ExitInterface(ExitInterface ni) {
     super(ni);
+    this.active = ni.active;
   }
-
-  private double lastConnectionTime = 0;
-
-  private final double EXIT_INTERVAL = 1.0;
 
   public NetworkInterface replicate() {
     return new ExitInterface(this);
@@ -53,32 +53,37 @@ public class ExitInterface extends SimpleBroadcastInterface implements Activatab
 
     optimizer.updateLocation(this);
     if (this.connections.size() > 0) {
-      if (getHost().getMovement() instanceof StationaryMovement) return;
 
       Connection con = this.connections.get(0);
       NetworkInterface anotherInterface = con.getOtherInterface(this);
+
       // all connections should be up at this stage
       assert this.connections.size() == 1 : "Too many connections on exit!";
 
-      disconnect(con, anotherInterface);
-      connections.remove(0);
-      for (Object item : getHost().getInterfaces()) {
-        if (item instanceof Activatable) {
-          Activatable activatable = (Activatable) item;
-          activatable.deactivate();
-        }
+      if (getHost().getMovement() instanceof ApocalypseMovement) {
+        disconnect(con, anotherInterface);
+        connections.remove(0);
+
+        ConnectivityGrid grid = (ConnectivityGrid) optimizer;
+        grid.removeInterface(this);
+
+        ApocalypseMovement movement = (ApocalypseMovement) getHost().getMovement();
+        movement.removeFromSimulation();
       }
-      ApocalypseMovement movement = (ApocalypseMovement) getHost().getMovement();
-      movement.removeFromSimulation();
+
     } else {
       if (simTime < lastConnectionTime + EXIT_INTERVAL) return;
+      if (getHost().getMovement() instanceof ApocalypseMovement) return;
+
       // Then find new possible connections
       Collection<NetworkInterface> interfaces = optimizer.getNearInterfaces(this);
       for (NetworkInterface i : interfaces) {
-        lastConnectionTime = simTime;
-        connect(i);
-        return;
+        ExitInterface leaver = (ExitInterface) i;
+        assert leaver.isActive() : "Inactive interface in grid";
+        connect(leaver);
+        if (connections.size() > 0) break;
       }
+      lastConnectionTime = simTime;
     }
   }
 

@@ -4,77 +4,80 @@
  */
 package interfaces;
 
-import java.util.Collection;
-
-import core.CBRConnection;
-import core.Connection;
+import core.DTNHost;
 import core.NetworkInterface;
 import core.Settings;
+import java.util.Random;
 
 /**
- * A simple Network Interface that provides a constant bit-rate service, where
- * one transmission can be on at a time.
+ * A simple Network Interface that provides a constant bit-rate service, where one transmission can
+ * be on at a time.
  */
+public class AgentInterface extends SimpleBroadcastInterface implements Activatable {
 
-public class AgentInterface extends SimpleBroadcastInterface implements Activatable  {
+  private static final double TURNING_RATE = 0.2;
 
-	/**
-	 * Reads the interface settings from the Settings file
-	 */
-	public AgentInterface(Settings s)	{
-		super(s);
+  private boolean isZombie;
+
+  private boolean active;
+
+  /** Reads the interface settings from the Settings file */
+  public AgentInterface(Settings s) {
+    super(s);
     active = false;
-	}
+    isZombie = false;
+  }
 
-	/**
-	 * Copy constructor
-	 * @param ni the copied network interface object
-	 */
-	public AgentInterface(AgentInterface ni) {
-		super(ni);
-	}
+  /**
+   * Copy constructor
+   *
+   * @param ni the copied network interface object
+   */
+  public AgentInterface(AgentInterface ni) {
+    super(ni);
+    this.active = ni.active;
+    this.isZombie = ni.isZombie;
+  }
 
-  public boolean active;
-
-	public NetworkInterface replicate()	{
-		return new AgentInterface(this);
-	}
+  public NetworkInterface replicate() {
+    return new AgentInterface(this);
+  }
 
   /**
    * Updates the state of current connections (i.e. tears down connections that are out of range and
    * creates new ones).
    */
-  @Override
-  public void update() {
-    if (optimizer == null) {
-      return; /* nothing to do */
-    }
-
-    // First break the old ones
-    optimizer.updateLocation(this);
-    for (int i = 0; i < this.connections.size(); ) {
-      Connection con = this.connections.get(i);
-      NetworkInterface anotherInterface = con.getOtherInterface(this);
-
-      // all connections should be up at this stage
-      assert con.isUp() : "Connection " + con + " was down!";
-
-      if (!isWithinRange(anotherInterface)) {
-        disconnect(con, anotherInterface);
-        connections.remove(i);
-      } else {
-        i++;
+  public void connect(NetworkInterface anotherInterface) {
+    super.connect(anotherInterface);
+    AgentInterface other = (AgentInterface) anotherInterface;
+    if ((isZombie && !other.isZombie()) || (!isZombie && other.isZombie())) {
+      DTNHost zombie = isZombie ? this.getHost() : other.getHost();
+      DTNHost human = isZombie ? other.getHost() : this.getHost();
+      Random rng = new Random();
+      double r = rng.nextDouble();
+      if (r < TURNING_RATE) {
+        human.pauseMovement(100);
+        zombie.pauseMovement(10);
+        if (!isZombie) {
+          human.setName("z<-" + getHost().getInitialName());
+        }
+        this.turn();
+        other.turn();
+        return;
       }
-    }
-    // Then find new possible connections
-    Collection<NetworkInterface> interfaces = optimizer.getNearInterfaces(this);
-    for (NetworkInterface i : interfaces) {
-      if (i instanceof AgentInterface) {
-        connect(i);
-      }
+      human.pauseMovement(10);
+      zombie.pauseMovement(15);
     }
   }
- 
+
+  public void turn() {
+    isZombie = true;
+  }
+
+  public boolean isZombie() {
+    return isZombie;
+  }
+
   @Override
   public boolean isActive() {
     return active;

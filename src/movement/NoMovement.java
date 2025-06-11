@@ -5,6 +5,8 @@ import core.Settings;
 
 /**
  * A stationary movement model that implements the SwitchableMovement interface.
+ * Made to be used in a zombie apocalypse, it can be created from a human or zombie movement model.
+ * 
  * This model does not change location and is always ready.
  */
 public class NoMovement extends MovementModel implements SwitchableMovement {
@@ -34,15 +36,18 @@ public class NoMovement extends MovementModel implements SwitchableMovement {
      */
     public NoMovement(NoMovement sm) {
         super(sm);
-        this.loc = sm.loc;
+        this.loc = sm.loc != null ? sm.loc.clone() : null;
+        this.controlSystem = sm.getControlSystem();
     }
     public NoMovement(HumanMovement sm) {
       super(sm);
       this.loc = sm.getLastLocation();
+      this.controlSystem = sm.getControlSystem();
     }
     public NoMovement(ZombieMovement sm) {
       super(sm);
       this.loc = sm.getLastLocation();
+      this.controlSystem = sm.getControlSystem();
     }
 
     @Override

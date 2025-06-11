@@ -106,7 +106,7 @@ public class BinaryEventsReader implements ExternalEventsReader {
 
 		// make sure the file name ends with binary extension
 		if (!fileName.endsWith(BINARY_EXT)) {
-			fileName += "BINARY_EXT";
+			fileName += BINARY_EXT;
 		}
 
 		ObjectOutputStream out;

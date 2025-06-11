@@ -4,8 +4,11 @@ import core.Coord;
 import core.NetworkInterface;
 import core.Settings;
 import interfaces.Activatable;
-import routing.ZombieRouter;
+import interfaces.AgentInterface;
 
+/**
+ * Movement model for a zombie apocalypse simulation that switches between the different movement models.
+*/
 public class ApocalypseMovement extends ExtendedMovementModel {
 
   private static final String INITIAL_MOVEMENT_SETTING = "initialMovement";
@@ -21,13 +24,6 @@ public class ApocalypseMovement extends ExtendedMovementModel {
         (SwitchableMovement)
             settings.createIntializedObject(
                 "movement." + settings.getSetting(INITIAL_MOVEMENT_SETTING));
-    if (mmInitial instanceof ZombieMovement) {
-      ZombieMovement zombieMovement = (ZombieMovement) mmInitial;
-      zombieMovement.getControlSystem().registerZombie(zombieMovement);
-    } else if (mmInitial instanceof HumanMovement) {
-      HumanMovement humanMovement = (HumanMovement) mmInitial;
-      humanMovement.getControlSystem().registerHuman(humanMovement);
-    }
     setCurrentMovementModel(mmInitial);
   }
 
@@ -38,7 +34,8 @@ public class ApocalypseMovement extends ExtendedMovementModel {
    */
   protected ApocalypseMovement(ApocalypseMovement amv) {
     super(amv);
-    setCurrentMovementModel(amv.getCurrentMovementModel());
+    setCurrentMovementModel(
+        (SwitchableMovement) ((MovementModel) amv.getCurrentMovementModel()).replicate());
   }
 
   @Override
@@ -65,12 +62,21 @@ public class ApocalypseMovement extends ExtendedMovementModel {
   @Override
   public boolean newOrders() {
     SwitchableMovement curr = getCurrentMovementModel();
-    if (curr instanceof HumanMovement && getHost().getRouter() instanceof ZombieRouter) {
+    AgentInterface currIface = null;
+    for (NetworkInterface i : getHost().getInterfaces()) {
+      if (i instanceof AgentInterface) currIface = (AgentInterface) i;
+    }
+
+    assert currIface != null : "Found an Agent without interface";
+
+    // This is needed form zombies that exist at the start of simulation;
+    if (curr instanceof ZombieMovement) currIface.turn();
+
+    if (curr instanceof HumanMovement && currIface.isZombie()) {
       HumanMovement oldMovement = (HumanMovement) curr;
       oldMovement.getControlSystem().unregisterHuman(oldMovement.getID());
       ZombieMovement newMovement = new ZombieMovement(oldMovement);
       setCurrentMovementModel(newMovement);
-      newMovement.getControlSystem().registerZombie(newMovement);
       return true;
     }
     if (curr instanceof HumanMovement || curr instanceof ZombieMovement) {
@@ -81,6 +87,14 @@ public class ApocalypseMovement extends ExtendedMovementModel {
         }
       }
     }
+    if (curr instanceof NoMovement) {
+      for (Object item : getHost().getInterfaces()) {
+        if (item instanceof Activatable) {
+          Activatable activatable = (Activatable) item;
+          activatable.deactivate();
+        }
+      }
+    }
     return true;
   }
 
@@ -88,6 +102,13 @@ public class ApocalypseMovement extends ExtendedMovementModel {
   public void removeFromSimulation() {
     SwitchableMovement curr = getCurrentMovementModel();
     NoMovement noMovement;
+
+    for (Object item : getHost().getInterfaces()) {
+      if (item instanceof Activatable) {
+        Activatable activatable = (Activatable) item;
+        activatable.deactivate();
+      }
+    }
     if (curr instanceof ZombieMovement) {
       ZombieMovement zombieMovement = (ZombieMovement) curr;
       zombieMovement.getControlSystem().unregisterZombie(zombieMovement.getID());
@@ -99,6 +120,5 @@ public class ApocalypseMovement extends ExtendedMovementModel {
     } else return;
 
     setCurrentMovementModel(noMovement);
-    System.out.println(getHost().getName() + " left the room");
   }
 }
