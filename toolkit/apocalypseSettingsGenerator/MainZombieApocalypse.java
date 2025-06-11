@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MainZombieApocalypse {
     public static final AtomicInteger edgeIdCounter = new AtomicInteger(0);
     public static final AtomicInteger nodeIdCounter = new AtomicInteger(0);
+    public static final AtomicInteger seedCounter = new AtomicInteger(0);
 
     //build graph from two CSV files one for nodes and one for edges
     private static Graph<RoomNode, RoomEdge> buildingGraph(String nodeName, String edgeName) throws IOException {
@@ -29,7 +30,7 @@ public class MainZombieApocalypse {
 
         String entrances = "";
         String exits = "";
-        String runs = "MovementModel.rngSeed = [" + java.util.concurrent.ThreadLocalRandom.current().nextInt(1, 10001) + "]\n";
+        String runs = "MovementModel.rngSeed = [" + seedCounter.getAndIncrement() + "]\n";
         String events = "";
 
 
@@ -44,7 +45,7 @@ public class MainZombieApocalypse {
                             "# Exit number " + edge.getId() + "e\n" +
                             "Group" + groupCounter + ".groupID = " + edge.getId() + "e\n" +
                             "#Always stationary\n" +
-                            "Group" + groupCounter + ".movementModel = StationaryMovement\n" +
+                            "Group" + groupCounter + ".movementModel = ExitMovement\n" +
                             "Group" + groupCounter + ".router = PassiveRouter\n" +
                             "Group" + groupCounter + ".nrofInterfaces = 1\n" +
                             "Group" + groupCounter + ".interface1 = exitInterface\n" +
