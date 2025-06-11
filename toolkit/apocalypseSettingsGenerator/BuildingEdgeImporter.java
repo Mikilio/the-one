@@ -27,7 +27,7 @@ public class BuildingEdgeImporter {
         //Group room by type IDs
         Map<Integer, List<RoomNode>> roomsByTemplateID = new HashMap<>();
         for (RoomNode node : graph.vertexSet()) {
-            roomsByTemplateID.computeIfAbsent(node.getTemplateID(), _ -> new ArrayList<>()).add(node);
+            roomsByTemplateID.computeIfAbsent(node.getTemplateID(), k -> new ArrayList<>()).add(node);
         }
 
 
