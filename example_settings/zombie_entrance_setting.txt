@@ -1,25 +1,8 @@
 Scenario.name = classroom_zombie
-Scenario.simulateConnections = true
-Scenario.updateInterval = 0.01
 Scenario.endTime = 10000
 # ~1h 23min
 
-# Communication settings
-#Interaction Human - Zombie
-agentInterface.type = AgentInterface
-agentInterface.transmitSpeed = 250k
-agentInterface.transmitRange = 0.5
-#Interaction Human & Zombie - Exit
-exitInterface.type = ExitInterface
-exitInterface.transmitSpeed = 250k
-exitInterface.transmitRange = 1
-# close contact only (~1 meter)
-
 Scenario.nrofHostGroups = 3
-
-Group.apocalypseControlSystemNr = 0
-Group.speed = 0.5, 1.5
-Group.waitTime = 0, 0
 
 ################################
 # Group 1: Random Humans (Students)
@@ -76,28 +59,3 @@ Events2.filePath = reports/apocalypse/e1e.binee
 MovementModel.rngSeed = 1
 # classroom size
 MovementModel.worldSize = 30 , 20
-
-
-# No need to change
-##############################
-# Reporting
-##############################
-ExitReport.Report.reportDir = reports/apocalypse/
-Report.nrofReports = 1
-Report.report1 = ExitReport
-
-##############################
-# Optimization
-##############################
-Optimization.connectionAlg = 2
-Optimization.cellSizeMult = 2
-Optimization.randomizeUpdateOrder = true
-
-##############################
-# GUI settings (optional)
-##############################
-GUI.UnderlayImage.fileName =
-GUI.UnderlayImage.offset = 0, 0
-GUI.UnderlayImage.scale = 1.0
-GUI.UnderlayImage.rotate = 0
-GUI.EventLogPanel.nrofEvents = 30

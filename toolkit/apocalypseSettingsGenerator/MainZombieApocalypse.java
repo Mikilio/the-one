@@ -97,25 +97,11 @@ public class MainZombieApocalypse {
 
         //Merge above created logic into settings file template
         String settings = "Scenario.name = " + name + "\n" +
-                "Scenario.simulateConnections = true\n" +
-                "Scenario.updateInterval = 0.01\n" +
+                //"Scenario.simulateConnections = true\n" +
+                //"Scenario.updateInterval = 0.01\n" +
                 "Scenario.endTime = " + simulationTime + "\n" +
                 "\n" +
-                "# Communication settings\n" +
-                "#Interaction Human - Zombie\n" +
-                "agentInterface.type = AgentInterface\n" +
-                "agentInterface.transmitSpeed = 250k\n" +
-                "agentInterface.transmitRange = 0.5\n" +
-                "#Interactino Human & Zombie - Exit\n" +
-                "exitInterface.type = ExitInterface\n" +
-                "exitInterface.transmitSpeed = 250k\n" +
-                "exitInterface.transmitRange = 1\n" +
-                "# close contact only (~1 meter)\n" +
-                "\n" +
                 "Scenario.nrofHostGroups = " + groupCounter + "\n" +
-                "\n" +
-                "Group.apocalypseControlSystemNr = 0\n" +
-                "Group.speed = 0.5, 1.\n" +
                 "\n" +
                 "################################\n" +
                 "# Group 1: Random Humans (Students)\n" +
@@ -161,39 +147,13 @@ public class MainZombieApocalypse {
                 "\n# classroom size\n" +
                 "MovementModel.worldSize = " + RoomSizeX + " , " + RoomSizeY + "\n" +
                 "# short warmup\n" +
-                "MovementModel.warmup = 10\n" +
+                "MovementModel.warmup = 200\n" +
                 "\n" +
                 "\n" +
                 "##############################\n" +
                 "# Infection event handling\n" +
                 "##############################\n" +
-                events +
-                "\n" +
-                "\n" +
-                "\n" +
-                "# No need to change\n" +
-                "##############################\n" +
-                "# Reporting\n" +
-                "##############################\n" +
-                "ExitReport.Report.reportDir = reports/apocalypse/\n" +
-                "Report.nrofReports = 1\n" +
-                "Report.report1 = ExitReport\n" +
-                "\n" +
-                "##############################\n" +
-                "# Optimization\n" +
-                "##############################\n" +
-                "Optimization.connectionAlg = 2\n" +
-                "Optimization.cellSizeMult = 2\n" +
-                "Optimization.randomizeUpdateOrder = true\n" +
-                "\n" +
-                "##############################\n" +
-                "# GUI settings (optional)\n" +
-                "##############################\n" +
-                "GUI.UnderlayImage.fileName =\n" +
-                "GUI.UnderlayImage.offset = 0, 0\n" +
-                "GUI.UnderlayImage.scale = 1.0\n" +
-                "GUI.UnderlayImage.rotate = 0\n" +
-                "GUI.EventLogPanel.nrofEvents = 30\n";
+                events;
         Files.write(Path.of("apocalypse_settings/" + name + ".txt"), settings.getBytes());
     }
 
