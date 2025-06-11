@@ -36,6 +36,7 @@ public class MainZombieApocalypse {
         //Logic to create settings for Exits
         for (RoomEdge edge : outgoingEdges) {
             groupCounter++;
+
             exits = exits.concat(
                     "################################\n" +
                             "# Group " + groupCounter + ": Exit\n" +
@@ -51,7 +52,6 @@ public class MainZombieApocalypse {
                             "Group" + groupCounter + ".priority = " + edge.getExitPriority() + "\n" +
                             "Group" + groupCounter + ".nrofHosts = 1\n\n"
             );
-
         }
 
 
@@ -65,7 +65,7 @@ public class MainZombieApocalypse {
         for (RoomEdge edge : incomingEdges) {
             // Assuming the edge represents an entrance, you can modify this logic as needed
             entrances = entrances.concat("################################\n" +
-                    "# Group " + groupCounter + ": Entrance for e" + edge.getId() + "e \n" +
+                    "# Group " + ++groupCounter + ": Entrance for e" + edge.getId() + "e \n" +
                     "################################\n" +
                     "#Number should be the edge number in the graph \n" +
                     "Group" + groupCounter + ".groupID = e" + edge.getId() + "e\n" +
