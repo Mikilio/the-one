@@ -129,10 +129,14 @@ public class ZombieMovement extends MovementModel implements SwitchableMovement 
 			double dx = nextDestination.getX() - lastWaypoint.getX();
 			double dy = nextDestination.getY() - lastWaypoint.getY();
 			double dist = lastWaypoint.distance(nextDestination);
-			c = new Coord(
-				lastWaypoint.getX() + (dx / dist) * distance,
-				lastWaypoint.getY() + (dy / dist) * distance
-			);
+			if (dist != 0) { // human at zombie location, don't need to move
+				c = new Coord(
+					lastWaypoint.getX() + (dx / dist) * distance,
+					lastWaypoint.getY() + (dy / dist) * distance
+				);
+			} else {
+				return null;
+			}
 		} else {
 			return null;
 		}

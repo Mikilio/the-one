@@ -103,12 +103,6 @@ public class ApocalypseMovement extends ExtendedMovementModel {
     SwitchableMovement curr = getCurrentMovementModel();
     NoMovement noMovement;
 
-    for (Object item : getHost().getInterfaces()) {
-      if (item instanceof Activatable) {
-        Activatable activatable = (Activatable) item;
-        activatable.deactivate();
-      }
-    }
     if (curr instanceof ZombieMovement) {
       ZombieMovement zombieMovement = (ZombieMovement) curr;
       zombieMovement.getControlSystem().unregisterZombie(zombieMovement.getID());

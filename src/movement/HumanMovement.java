@@ -17,7 +17,7 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 	public static final int WALKING = 1;
 	public static final int FLEEING = 2;
 
-	public static final double DETECTION_RADIUS = 20; // Radius to detect zombies and alerted humans
+	public static final double DETECTION_RADIUS = 1000; // Radius to detect zombies and alerted humans
 
 	public static final double K_H = 1; // Repulsion constant of humans
 	public static final double K_Z = 4; // Repulsion constant of zombies
@@ -335,7 +335,7 @@ public class HumanMovement extends MovementModel implements SwitchableMovement {
 			return new Coord(0,0); // Avoid division by zero
 		}
 		return new Coord(
-			- k * Math.exp(- Math.log(a) * dist) * dx / dist, 
+			- k * Math.exp(- Math.log(a) * dist) * dx / dist,
 			- k * Math.exp(- Math.log(a) * dist) * dy / dist
 		);
 	}

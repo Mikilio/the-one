@@ -51,7 +51,10 @@ public class ExitInterface extends SimpleBroadcastInterface implements Activatab
 
     double simTime = SimClock.getTime();
 
-    optimizer.updateLocation(this);
+    if (this.isActive()) {
+      optimizer.updateLocation(this);
+    }
+
     if (this.connections.size() > 0) {
 
       Connection con = this.connections.get(0);
@@ -63,9 +66,6 @@ public class ExitInterface extends SimpleBroadcastInterface implements Activatab
       if (getHost().getMovement() instanceof ApocalypseMovement) {
         disconnect(con, anotherInterface);
         connections.remove(0);
-
-        ConnectivityGrid grid = (ConnectivityGrid) optimizer;
-        grid.removeInterface(this);
 
         ApocalypseMovement movement = (ApocalypseMovement) getHost().getMovement();
         movement.removeFromSimulation();
