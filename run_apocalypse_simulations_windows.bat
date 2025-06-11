@@ -3,37 +3,52 @@
 
 echo Starting simulations
 
-echo Running originClassRoom.txt (1 run)
-java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar %* -b 1 apocalypse_settings/originClassRoom.txt
+echo Running originClassRoom0.txt (1 run)
+java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar core.DTNSim %* -b 1   apocalypse_settings/originClassRoom0.txt
 timeout /t 2 >nul
 
-echo Running FingerHallwayInfectionOrigin.txt (1 run)
-java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar %* -b 1 apocalypse_settings/FingerHallwayInfectionOrigin.txt
+echo Running FingerHallwayInfectionOrigin1.txt (1 run)
+java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar core.DTNSim %* -b 1   apocalypse_settings/FingerHallwayInfectionOrigin1.txt
 timeout /t 2 >nul
 
-echo Running ClassRoomSameFinger.txt (19 runs)
-java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar %* -b 19 apocalypse_settings/ClassRoomSameFinger.txt
+echo Running ClassRoomSameFingerXX.txt (19 runs)
+for /l %%i in (2,1,20) do (
+java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar core.DTNSim %* -b 1   apocalypse_settings/ClassRoomSameFinger%%i.txt
+)
 
-echo Running BalconyNordEtage1.txt (1 run)
-java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar %* -b 1 apocalypse_settings/BalconyNordEtage1.txt
+echo Running BalconyNordEtage121.txt (1 run)
+java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar core.DTNSim %* -b 1   apocalypse_settings/BalconyNordEtage121.txt
+timeout /t 5 >nul
+
+
+echo Running FingerHallwayUninfectedXX.txt (5 runs)
+for /l %%i in (22,1,26) do (
+java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar core.DTNSim %* -b 1   apocalypse_settings/FingerHallwayUninfected%%i.txt
+)
+
+echo Running BridgeXX.txt (2 runs)
+for /l %%i in (27,1,28) do (
+java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar core.DTNSim %* -b 1   apocalypse_settings/Bridge%%i.txt
+)
 timeout /t 2 >nul
 
-echo Running Bridge.txt (2 runs)
-java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar %* -b 2 apocalypse_settings/Bridge.txt
 
-echo Running FingerHallwayUninfected.txt (5 runs)
-java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar %* -b 5 apocalypse_settings/FingerHallwayUninfected.txt
+echo Running classRoomSameFloorXX.txt (80 runs)
+for /l %%i in (29,1,108) do (
+java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar core.DTNSim %* -b 1   apocalypse_settings/classRoomSameFloor%%i.txt
+)
+
+echo Running StairsXX.txt (4 runs)
+for /l %%i in (109,1,112) do (
+java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar core.DTNSim %* -b 1   apocalypse_settings/Stairs%%i.txt
+)
 timeout /t 2 >nul
 
-echo Running classRoomSameFloor.txt (1 run)
-java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar %* -b 1 apocalypse_settings/classRoomSameFloor.txt
+echo Running Magistrale114.txt (1 run)
+java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar core.DTNSim %* -b 1   apocalypse_settings/Magistrale114.txt
 
-echo Running Stairs.txt (4 runs)
-java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar %* -b 4 apocalypse_settings/Stairs.txt
-timeout /t 2 >nul
-
-echo Running Magistrale.txt (1 run)
-java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar %* -b 1 apocalypse_settings/Magistrale.txt
+echo Running OtherFloors113.txt (1 run)
+java -Xmx512M -cp out\production\the-one;lib/ECLA.jar;lib/DTNConsoleConnection.jar core.DTNSim %* -b 1   apocalypse_settings/OtherFloors113.txt
 
 echo All simulations complete.
 pause

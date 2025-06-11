@@ -24,7 +24,7 @@ public class MainZombieApocalypse {
     //Function to create a settings file for a specific node
     private static void createSettingsFile(String name, double RoomSizeX, double RoomSizeY, int nrOfHumans, int nrOfZombies, int simulationTime, Set<RoomEdge> incomingEdges, Set<RoomEdge> outgoingEdges, int runIndex) throws IOException {
 
-        int groupCounter = 3;
+        int groupCounter = 2;
         int eventCounter = 1;
 
         String entrances = "";
@@ -35,7 +35,7 @@ public class MainZombieApocalypse {
 
         //Logic to create settings for Exits
         for (RoomEdge edge : outgoingEdges) {
-
+            groupCounter++;
             exits = exits.concat(
                     "################################\n" +
                             "# Group " + groupCounter + ": Exit\n" +
@@ -48,16 +48,18 @@ public class MainZombieApocalypse {
                             "Group" + groupCounter + ".nrofInterfaces = 1\n" +
                             "Group" + groupCounter + ".interface1 = exitInterface\n" +
                             "Group" + groupCounter + ".nodeLocation = " + (int) edge.getExit().getX() + ", " + (int) edge.getExit().getY() + "\n" +
-                            "Group4.priority = " + edge.getExitPriority() + "\n" +
+                            "Group" + groupCounter + ".priority = " + edge.getExitPriority() + "\n" +
                             "Group" + groupCounter + ".nrofHosts = 1\n\n"
             );
-            groupCounter++;
+
         }
 
 
         //Logic to create settings for Entrances
         if (!incomingEdges.isEmpty()) {
             events = events.concat("#One event per Entrance\n" + "Events.nrof = " + incomingEdges.size() + "\n");
+        } else {
+            events = events.concat("#One event per Entrance\n" + "Events.nrof = 1\n");
         }
 
         for (RoomEdge edge : incomingEdges) {
@@ -192,8 +194,8 @@ public class MainZombieApocalypse {
 
         //Depth Search through the graph and create settings files for each room
         Graph<RoomNode, RoomEdge> buildingLayout = buildingGraph("nodeList.csv", "edgeList.csv");
-       generateSettingsFiles(buildingLayout);
-      //  printGraph(buildingLayout);
+        generateSettingsFiles(buildingLayout);
+        //  printGraph(buildingLayout);
 
     }
 }
